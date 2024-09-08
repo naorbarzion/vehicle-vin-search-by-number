@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request
+from flask import Flask, request, send_file
 import requests
 
 app = Flask(__name__)
@@ -32,7 +32,8 @@ def index():
         vehicle_number = request.form.get('vehicle_number')
         records = fetch_vehicle_data(vehicle_number)
     
-    return render_template('index.html', records=records)
+    # שליחת הקובץ index.html מהנתיב הראשי
+    return send_file('index.html')
 
 if __name__ == '__main__':
     # Listen on the appropriate port
