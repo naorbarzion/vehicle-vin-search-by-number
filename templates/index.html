@@ -155,6 +155,8 @@
                 <th>תאריך בדיקה אחרונה</th>
                 <th>סוג דלק</th>
                 <th>מספר VIN</th>
+                <th>קילומטראז'</th>
+                <th>מפלס דלק</th>
                 <th>פעולה</th>
             </tr>
         </thead>
@@ -170,6 +172,8 @@
                 <td data-label="תאריך בדיקה אחרונה">{{ record['mivchan_acharon_dt'] }}</td>
                 <td data-label="סוג דלק">{{ record['sug_delek_nm'] }}</td>
                 <td data-label="מספר VIN">{{ record['misgeret'] }}</td>
+                <td data-label="קילומטראז'">{{ record['kilometer_reading'] }}</td>
+                <td data-label="מפלס דלק">{{ record['fuel_level'] }}</td>
                 <td data-label="פעולה"><button class="action-button">מחיקה</button></td>
             </tr>
             {% endfor %}
