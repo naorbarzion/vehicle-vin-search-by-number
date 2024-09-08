@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Database Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table, th, td { border: 1px solid black; padding: 10px; }
+        th { background-color: #303F9F; color: white; }
+        td { background-color: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h1>Vehicle Database Viewer</h1>
+    <form method="POST">
+        <label for="vehicle_number">Enter Vehicle Number:</label>
+        <input type="text" id="vehicle_number" name="vehicle_number" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if records %}
+    <table>
+        <thead>
+            <tr>
+                <th>Vehicle Number</th>
+                <th>Model</th>
+                <th>Manufacturer</th>
+                <th>Year</th>
+                <th>Color</th>
+                <th>Owner</th>
+                <th>Last Inspection</th>
+                <th>Fuel Type</th>
+                <th>VIN</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record['mispar_rechev'] }}</td>
+                <td>{{ record['kinuy_mishari'] }}</td>
+                <td>{{ record['tozeret_nm'] }}</td>
+                <td>{{ record['shnat_yitzur'] }}</td>
+                <td>{{ record['tzeva_rechev'] }}</td>
+                <td>{{ record['baalut'] }}</td>
+                <td>{{ record['mivchan_acharon_dt'] }}</td>
+                <td>{{ record['sug_delek_nm'] }}</td>
+                <td>{{ record['misgeret'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</body>
+</html>
