@@ -92,6 +92,38 @@
         .action-button:hover {
             background-color: #008fcc;
         }
+
+        /* התאמה למובייל - עיצוב טבלה אנכית */
+        @media screen and (max-width: 768px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+
+            tr {
+                margin-bottom: 10px;
+                border-bottom: 2px solid #ddd;
+            }
+
+            td, th {
+                text-align: left;
+                padding-left: 50%;
+                position: relative;
+            }
+
+            td:before, th:before {
+                position: absolute;
+                left: 10px;
+                top: 10px;
+                white-space: nowrap;
+            }
+
+            /* כותרות שדה עבור מובייל */
+            td:before {
+                content: attr(data-label);
+                font-weight: bold;
+            }
+        }
     </style>
 </head>
 <body>
@@ -129,16 +161,16 @@
         <tbody>
             {% for record in records %}
             <tr>
-                <td>{{ record['mispar_rechev'] }}</td>
-                <td>{{ record['kinuy_mishari'] }}</td>
-                <td>{{ record['tozeret_nm'] }}</td>
-                <td>{{ record['shnat_yitzur'] }}</td>
-                <td>{{ record['tzeva_rechev'] }}</td>
-                <td>{{ record['baalut'] }}</td>
-                <td>{{ record['mivchan_acharon_dt'] }}</td>
-                <td>{{ record['sug_delek_nm'] }}</td>
-                <td>{{ record['misgeret'] }}</td>
-                <td><button class="action-button">מחיקה</button></td>
+                <td data-label="מספר רכב">{{ record['mispar_rechev'] }}</td>
+                <td data-label="מודל">{{ record['kinuy_mishari'] }}</td>
+                <td data-label="יצרן">{{ record['tozeret_nm'] }}</td>
+                <td data-label="שנת ייצור">{{ record['shnat_yitzur'] }}</td>
+                <td data-label="צבע">{{ record['tzeva_rechev'] }}</td>
+                <td data-label="בעלות">{{ record['baalut'] }}</td>
+                <td data-label="תאריך בדיקה אחרונה">{{ record['mivchan_acharon_dt'] }}</td>
+                <td data-label="סוג דלק">{{ record['sug_delek_nm'] }}</td>
+                <td data-label="מספר VIN">{{ record['misgeret'] }}</td>
+                <td data-label="פעולה"><button class="action-button">מחיקה</button></td>
             </tr>
             {% endfor %}
         </tbody>
