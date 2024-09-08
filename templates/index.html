@@ -3,11 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vehicle Search</title>
+    <title>Vehicle Database Viewer</title>
     <style>
+        /* עיצוב כללי */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* עיצוב החלק העליון */
+        .header {
+            background-color: #00a2ff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header img {
+            max-height: 80px;
         }
 
         h1 {
@@ -16,6 +30,7 @@
             margin-top: 20px;
         }
 
+        /* עיצוב טופס */
         form {
             text-align: center;
             margin-bottom: 20px;
@@ -40,11 +55,12 @@
             background-color: #008fcc;
         }
 
+        /* עיצוב טבלה */
         table {
             width: 90%;
-            margin: 20px auto;
+            margin: 0 auto;
             border-collapse: collapse;
-            background-color: white;
+            margin-bottom: 20px;
         }
 
         table, th, td {
@@ -59,23 +75,74 @@
         }
 
         td {
+            background-color: #ffffff;
             padding: 10px;
             text-align: center;
         }
 
+        /* כפתור בטבלה */
+        .action-button {
+            background-color: #00a2ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background-color: #008fcc;
+        }
+
+        /* התאמה למובייל - עיצוב טבלה אנכית */
+        @media screen and (max-width: 768px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+
+            tr {
+                margin-bottom: 10px;
+                border-bottom: 2px solid #ddd;
+            }
+
+            td, th {
+                text-align: left;
+                padding-left: 50%;
+                position: relative;
+            }
+
+            td:before, th:before {
+                position: absolute;
+                left: 10px;
+                top: 10px;
+                white-space: nowrap;
+            }
+
+            /* כותרות שדה עבור מובייל */
+            td:before {
+                content: attr(data-label);
+                font-weight: bold;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <h1>חיפוש רכבים</h1>
+    <!-- אזור הכותרת עם לוגו -->
+    <div class="header">
+        <img src="https://team.tracer.co.il/assets/logo.png" alt="Tracer Logo">
+    </div>
 
+    <h1>רשימת רכבים</h1>
+
+    <!-- טופס החיפוש -->
     <form method="POST">
-        <input type="text" name="vehicle_number" placeholder="הכנס מספר רכב" required>
+        <input type="text" id="vehicle_number" name="vehicle_number" placeholder="הכנס מספר רכב..." required>
         <button type="submit">חפש</button>
     </form>
 
-    {% if api_records %}
-    <h2>תוצאות מה-API</h2>
+    {% if records %}
+    <!-- הצגת תוצאות החיפוש -->
     <table>
         <thead>
             <tr>
@@ -84,42 +151,32 @@
                 <th>יצרן</th>
                 <th>שנת ייצור</th>
                 <th>צבע</th>
+                <th>בעלות</th>
+                <th>תאריך בדיקה אחרונה</th>
                 <th>סוג דלק</th>
                 <th>מספר VIN</th>
+                <th>פעולה</th>
             </tr>
         </thead>
         <tbody>
-            {% for record in api_records %}
+            {% for record in records %}
             <tr>
-                <td>{{ record['mispar_rechev'] }}</td>
-                <td>{{ record['kinuy_mishari'] }}</td>
-                <td>{{ record['tozeret_nm'] }}</td>
-                <td>{{ record['shnat_yitzur'] }}</td>
-                <td>{{ record['tzeva_rechev'] }}</td>
-                <td>{{ record['sug_delek_nm'] }}</td>
-                <td>{{ record['misgeret'] }}</td>
+                <td data-label="מספר רכב">{{ record['mispar_rechev'] }}</td>
+                <td data-label="מודל">{{ record['kinuy_mishari'] }}</td>
+                <td data-label="יצרן">{{ record['tozeret_nm'] }}</td>
+                <td data-label="שנת ייצור">{{ record['shnat_yitzur'] }}</td>
+                <td data-label="צבע">{{ record['tzeva_rechev'] }}</td>
+                <td data-label="בעלות">{{ record['baalut'] }}</td>
+                <td data-label="תאריך בדיקה אחרונה">{{ record['mivchan_acharon_dt'] }}</td>
+                <td data-label="סוג דלק">{{ record['sug_delek_nm'] }}</td>
+                <td data-label="מספר VIN">{{ record['misgeret'] }}</td>
+                <td data-label="פעולה"><button class="action-button">מחיקה</button></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    {% endif %}
-
-    {% if support_data %}
-    <h2>תמיכה בקילומטראז' ובמפלס דלק (DB)</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>תמיכה בקילומטראז'</th>
-                <th>תמיכה במפלס דלק</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ support_data['תמיכה בקילומטראז'] }}</td>
-                <td>{{ support_data['תמיכה במפלס דלק'] }}</td>
-            </tr>
-        </tbody>
-    </table>
+    {% else %}
+    <p style="text-align: center;">לא נמצאו תוצאות.</p>
     {% endif %}
 
 </body>
