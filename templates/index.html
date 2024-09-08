@@ -5,35 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vehicle Database Viewer</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table, th, td { border: 1px solid black; padding: 10px; }
-        th { background-color: #303F9F; color: white; }
-        td { background-color: #f0f0f0; }
+        /* עיצוב כללי */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* עיצוב החלק העליון */
+        .header {
+            background-color: #00a2ff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header img {
+            max-height: 80px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* עיצוב טופס */
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #00a2ff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #008fcc;
+        }
+
+        /* עיצוב טבלה */
+        table {
+            width: 90%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #00a2ff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        td {
+            background-color: #ffffff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* כפתור בטבלה */
+        .action-button {
+            background-color: #00a2ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background-color: #008fcc;
+        }
     </style>
 </head>
 <body>
-    <h1>Vehicle Database Viewer</h1>
+
+    <!-- אזור הכותרת עם לוגו -->
+    <div class="header">
+        <img src="https://team.tracer.co.il/assets/logo.png" alt="Tracer Logo">
+    </div>
+
+    <h1>רשימת רכבים</h1>
+
+    <!-- טופס החיפוש -->
     <form method="POST">
-        <label for="vehicle_number">Enter Vehicle Number:</label>
-        <input type="text" id="vehicle_number" name="vehicle_number" required>
-        <button type="submit">Search</button>
+        <input type="text" id="vehicle_number" name="vehicle_number" placeholder="הכנס מספר רכב..." required>
+        <button type="submit">חפש</button>
     </form>
 
     {% if records %}
-    <h2>Search Results</h2>
+    <!-- הצגת תוצאות החיפוש -->
     <table>
         <thead>
             <tr>
-                <th>Vehicle Number</th>
-                <th>Model</th>
-                <th>Manufacturer</th>
-                <th>Year</th>
-                <th>Color</th>
-                <th>Owner</th>
-                <th>Last Inspection</th>
-                <th>Fuel Type</th>
-                <th>VIN</th>
+                <th>מספר רכב</th>
+                <th>מודל</th>
+                <th>יצרן</th>
+                <th>שנת ייצור</th>
+                <th>צבע</th>
+                <th>בעלות</th>
+                <th>תאריך בדיקה אחרונה</th>
+                <th>סוג דלק</th>
+                <th>מספר VIN</th>
+                <th>פעולה</th>
             </tr>
         </thead>
         <tbody>
@@ -48,12 +138,14 @@
                 <td>{{ record['mivchan_acharon_dt'] }}</td>
                 <td>{{ record['sug_delek_nm'] }}</td>
                 <td>{{ record['misgeret'] }}</td>
+                <td><button class="action-button">מחיקה</button></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <p>No records found.</p>
+    <p style="text-align: center;">לא נמצאו תוצאות.</p>
     {% endif %}
+
 </body>
 </html>
