@@ -18,7 +18,7 @@ def fetch_vehicle_data(vehicle_number):
         response = requests.get(url, params=params)
         data = response.json()
         if data.get('success'):
-            return data['result']['records']
+            return data['result']['records']  # החזרת הרשומות מהתוצאה
         else:
             return []
     except Exception as e:
@@ -30,7 +30,7 @@ def index():
     records = None
     if request.method == 'POST':
         vehicle_number = request.form.get('vehicle_number')
-        records = fetch_vehicle_data(vehicle_number)
+        records = fetch_vehicle_data(vehicle_number)  # קבלת נתונים מה-API
     
     return render_template('index.html', records=records)
 
