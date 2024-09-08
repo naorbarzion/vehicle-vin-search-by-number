@@ -2,5 +2,6 @@ Flask==2.1.2
 requests==2.27.1
 gunicorn==20.1.0
 psycopg2-binary==2.9.3
-pandas==1.5.3  # Ensures compatibility with Python 3.11
-openpyxl==3.0.9  # Needed for reading and writing Excel files
+pandas==1.5.3  # Use pandas 1.5.3, which is more stable
+numpy==1.23.5  # Ensure compatibility with pandas 1.5.3
+openpyxl==3.0.9
