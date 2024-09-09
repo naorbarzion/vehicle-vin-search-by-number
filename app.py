@@ -20,13 +20,6 @@ class Vehicle(db.Model):
     fuel_level = db.Column(db.Float, nullable=True)
     battery_level = db.Column(db.Float, nullable=True)
 
-class ElectricVehicle(db.Model):
-    __tablename__ = 'fmc_vehicles_list_electric'
-    id = db.Column(db.Integer, primary_key=True)
-    make = db.Column(db.String(100))
-    model = db.Column(db.String(100))
-    battery_level = db.Column(db.Float, nullable=True)
-
 # פונקציה שמבצעת חיפוש ברשומות ה-API של CKAN
 def fetch_vehicle_data(vehicle_number):
     url = "https://data.gov.il/api/3/action/datastore_search"
@@ -45,16 +38,13 @@ def fetch_vehicle_data(vehicle_number):
         else:
             return []
     except Exception as e:
-        print(f"Failed to retrieve data: {e}")
+        print(f"Failed to retrieve data from CKAN API: {e}")
         return []
 
-# פונקציה לחיפוש רכב בדאטהבייס
-def search_vehicle_in_db(make, model, is_electric):
+# פונקציה לחיפוש רכב בדאטהבייס לפי מודל בלבד
+def search_vehicle_in_db(model):
     try:
-        if is_electric:
-            result = ElectricVehicle.query.filter_by(make=make, model=model).first()
-        else:
-            result = Vehicle.query.filter_by(make=make, model=model).first()
+        result = Vehicle.query.filter_by(model=model).first()
         return result
     except Exception as e:
         print(f"Database search error: {e}")
@@ -64,20 +54,33 @@ def search_vehicle_in_db(make, model, is_electric):
 def index():
     records = None
     db_record = None
+    error_message = None
     if request.method == 'POST':
-        vehicle_number = request.form.get('vehicle_number')
-        records = fetch_vehicle_data(vehicle_number)
-        
-        if records:
-            make = records[0]['tozeret_nm']
-            model = records[0]['kinuy_mishari']
-            fuel_type = records[0]['sug_delek_nm']
-            is_electric = (fuel_type == 'חשמל')
+        try:
+            vehicle_number = request.form.get('vehicle_number')
+            records = fetch_vehicle_data(vehicle_number)
+            
+            if records:
+                model = records[0]['kinuy_mishari']
 
-            # חיפוש בדאטהבייס
-            db_record = search_vehicle_in_db(make, model, is_electric)
+                # חיפוש בדאטהבייס
+                db_record = search_vehicle_in_db(model)
+                
+                # בדיקה אם יש קריאת קילומטראז' או סוללה
+                if db_record:
+                    if db_record.battery_level is not None:
+                        print(f"Battery level: {db_record.battery_level}")
+                    elif db_record.fuel_level is not None:
+                        print(f"Fuel level: {db_record.fuel_level}")
+                else:
+                    print("No matching vehicle found in the database.")
+            else:
+                error_message = "No records found in the CKAN API for the given vehicle number."
+        except Exception as e:
+            error_message = f"An error occurred: {e}"
+            print(f"An error occurred in the index function: {e}")
 
-    return render_template('index.html', records=records, db_record=db_record)
+    return render_template('index.html', records=records, db_record=db_record, error_message=error_message)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
