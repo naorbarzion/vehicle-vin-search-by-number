@@ -4,12 +4,8 @@ gunicorn==20.1.0
 Werkzeug==2.1.2
 psycopg2-binary==2.9.3
 Flask-SQLAlchemy==2.5.1
-SQLAlchemy==1.4.46  # שימוש בגרסה ישנה יותר של SQLAlchemy
-pandas==1.5.3  # גרסת pandas שציינת
-
-# גרסת numpy מותאמת ל-pandas כדי להימנע מבעיות תאימות בינאריות
-numpy==1.21.6
-
-# חבילות נוספות שה-pandas משתמש בהן:
+SQLAlchemy==1.4.46
+pandas==1.5.3
+numpy==1.23.5  # גרסה תואמת ל-Python 3.11
 python-dateutil>=2.8.1
 pytz>=2020.1
