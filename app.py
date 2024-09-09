@@ -81,7 +81,7 @@ def create_tables_if_not_exist():
 def import_data_from_csv():
     try:
         if not Vehicle.query.first():  # אם אין נתונים, נייבא מה-CSV
-            with open('/mnt/data/fmc_vehicles_list.csv', newline='') as csvfile:
+            with open('database/fmc_vehicles_list.csv', newline='') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     vehicle = Vehicle(
@@ -94,7 +94,7 @@ def import_data_from_csv():
                 db.session.commit()
 
         if not ElectricVehicle.query.first():  # אם אין נתונים, נייבא מה-CSV של רכבי חשמל
-            with open('/mnt/data/fmc_vehicles_list_electric.csv', newline='') as csvfile:
+            with open('database/fmc_vehicles_list_electric.csv', newline='') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     ev = ElectricVehicle(
