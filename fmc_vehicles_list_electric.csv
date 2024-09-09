@@ -1,0 +1,138 @@
+#,Make,Model,"Date -
+Start","Date -
+End",Kilometer,"Battery
+Level"
+1,Audi,E-Tron,2019,-,+,+
+2,Audi,E-Tron Gt,2020,-,+,+
+3,Audi,Q4 E-Tron,2019,-,+,+
+4,Audi,Q4 Test,2020,-,+,+
+5,Audi,Q8 E-Tron,2019,-,+,+
+6,Baic,"Ec5, X25, Ex360",2015,-,,+
+7,Baic,EX360,2015,-,,+
+8,Baic,X25,2015,-,,+
+9,Bmw,I3,2013,-,+,+
+10,Bmw,I7,2022,-,+,+
+11,Bmw,I8,2014,2020,+,
+12,Bmw,IX,2021,-,+,+
+13,Bmw,IX3,2020,-,+,+
+14,Byd,Atto 3,2022,-,+,+
+15,Byd,E6 II,2021,-,+,+
+16,Byd,Han,2020,-,+,+
+17,Byd,Hce,2020,-,+,+
+18,Byd,Tan Ev,2018,-,+,+
+19,Byd,Tang,2018,-,+,+
+20,Chevrolet,Bolt Ev,2016,-,+,+
+21,Citroën,C-Zero,2010,-,+,+
+22,Citroën,Ds 3 Crossback E-Tense,2018,-,+,+
+23,Citroën,E-Berlingo,2021,-,+,+
+24,Citroën,Ë-C4,2020,-,+,+
+25,Citroën,E-Jumpy,2019,-,+,+
+26,Citroën,E-Spacetourer,2019,-,+,+
+27,Cupra,Born,2021,-,+,+
+28,Dacia,Spring,2021,2025,+,+
+29,Fiat,500E,2013,2020,+,+
+30,Fiat,500E,2020,-,+,+
+31,Fiat,E-Ducato,2020,-,+,+
+32,Ford,E-Transit,2022,-,+,+
+33,Ford,Explorer,2023,-,+,+
+34,Ford,F-150 Lightning,2022,-,+,+
+35,Ford,Mustang Mach-E,2019,-,+,+
+36,Genesis,Gv60,2021,-,+,+
+37,Green Tour,Ev4,2015,-,,+
+38,Honda,E,2020,-,+,+
+39,Hyundai,Ioniq,2017,-,+,+
+40,Hyundai,Ioniq 5,2021,-,+,+
+41,Hyundai,Ioniq 6,2022,-,+,+
+42,Hyundai,Kona,2017,-,+,
+43,Hyundai,Kona Ev,2018,-,+,+
+44,Jaguar,I-Pace,2018,-,+,+
+45,Kia,E-Niro,2017,2022,+,+
+46,Kia,E-Soul,2014,2019,+,+
+47,Kia,Ev6,2021,-,+,+
+48,Kia,Niro Ev,2022,-,+,+
+49,Kia,Soul,2020,-,+,+
+50,Lexus,UX,2018,-,+,+
+51,Lynk&Co,1,2017,-,+,+
+52,Man,Etge,2017,-,+,+
+53,Maxus,D60,2019,-,+,+
+54,Maxus,Edeliver 3 (Ev30),2018,-,+,+
+55,Maxus,Euniq 6,2019,-,+,+
+56,Maxus,T90,2021,-,+,+
+57,Mercedes-Benz,EQV,2017,-,+,+
+58,Mercedes-Benz,Esprinter,2020,-,+,+
+59,Mercedes-Benz,E-Vito,2014,2023,+,+
+60,Mercedes-Benz,GLE,2011,2019,+,+
+61,MG,Marvel R,2018,-,+,+
+62,MG,Marvel X,2018,-,+,+
+63,MG,MG5 EV,2019,-,+,+
+64,Mini,Cooper S Electric,2019,-,+,+
+65,Mitsubishi,I-Miev,2010,-,+,+
+66,Nissan,Ariya,2022,-,+,+
+67,Nissan,E-Nv200,2012,-,+,+
+68,Nissan,Leaf,2018,-,+,+
+69,Nissan,Sakura,2022,-,+,+
+70,Opel,Ampera-E,2016,-,+,+
+71,Opel,Combo-E,2021,-,+,+
+72,Opel,Corsa-E,2020,-,+,+
+73,Opel,Mokka-E,2020,-,+,+
+74,Opel,Vivaro-E,2020,-,+,+
+75,Opel,Zafira-E,2020,-,+,+
+76,Ora,Cat,2020,-,+,+
+77,Ora,Funky Cat,2020,-,+,+
+78,Ora,Good Cat,2020,-,+,+
+79,Ora,Haomao,2020,-,+,+
+80,Peugeot,E-2008,2019,-,+,+
+81,Peugeot,E-208,2019,-,+,+
+82,Peugeot,E-Expert,2019,-,+,+
+83,Peugeot,E-Partner,2021,-,+,+
+84,Peugeot,E-Rifter,2021,-,+,+
+85,Peugeot,E-Traveller,2019,-,+,+
+86,Peugeot,Ion,2010,-,+,+
+87,Polestar,2,2020,-,+,+
+88,Polestar,PS2,2020,-,+,+
+89,Porsche,Taycan,2019,-,+,+
+90,Renault,Kangoo Electric,2011,2022,+,+
+91,Renault,Kangoo E-Tech,2019,-,+,+
+92,Renault,Kangoo Z.E.,2011,2022,+,+
+93,Renault,Master,2018,-,+,+
+94,Renault,Megane E-Tech Electric,2022,-,+,+
+95,Renault,Twizy,2012,-,+,+
+96,Renault,Zoe,2019,-,+,+
+97,Seat,Mii (Electric),2012,-,+,+
+98,Seres,DFSK,2019,-,+,+
+99,Seres,Dongfeng,2019,-,+,+
+100,Seres,Model 3 (E3),2019,-,+,+
+101,Seres,Seres 3,2019,-,+,+
+102,Škoda,Citigo-E,2012,-,+,+
+103,Škoda,Enyaq Iv,2020,-,+,+
+104,Smart,Eq Forfour,2014,-,+,+
+105,Smart,Eq Fortwo,2014,-,+,+
+106,Smart,Fortwo Ed (Electric),2009,2014,+,
+107,Tesla,Model 3,2017,-,+,+
+108,Tesla,Model S,2012,-,+,+
+109,Tesla,Model X,2016,-,+,+
+110,Tesla,Model Y,2020,-,+,+
+111,Toyota,Corolla Cross,2020,-,+,+
+112,Toyota,Proace City (Electric),2021,-,+,+
+113,Toyota,Proace Electric,2020,-,+,+
+114,Toyota,Yaris,2020,-,+,
+115,Toyota,Yaris,2020,-,+,
+116,Vauxhall,Combo-E,2021,-,+,+
+117,Vauxhall,Corsa-E,2020,-,+,+
+118,Vauxhall,Mokka-E,2020,-,+,+
+119,Vauxhall,Vivaro-E,2020,-,+,+
+120,Vauxhall,Zafira-E,2020,-,+,+
+121,"Volkswagen
+Volkswagen","E-Crafter
+E-Golf","2017
+2012","-
+2020","+
++","+
++"
+122,,,,,,
+123,Volkswagen,E-Up!,2012,-,+,+
+124,Volkswagen,Id.3,2019,-,+,+
+125,Volkswagen,Id.4,2020,-,+,+
+126,Volkswagen,Id.5,2020,-,+,+
+127,Volvo,C40,2019,-,+,+
+128,Volvo,XC40,2019,-,+,+
