@@ -11,14 +11,23 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# מודל למסד הנתונים
+# מודל למסד הנתונים (לרכבי בנזין)
 class Vehicle(db.Model):
     __tablename__ = 'fmc_vehicles_list'
     id = db.Column(db.Integer, primary_key=True)
     make = db.Column(db.String(100))
     model = db.Column(db.String(100))
     fuel_level = db.Column(db.Float, nullable=True)
+    kilometer = db.Column(db.Boolean, nullable=True)  # האם תומך בקילומטראז'
+
+# מודל למסד הנתונים (לרכבי חשמל)
+class ElectricVehicle(db.Model):
+    __tablename__ = 'fmc_vehicles_list_electric'
+    id = db.Column(db.Integer, primary_key=True)
+    make = db.Column(db.String(100))
+    model = db.Column(db.String(100))
     battery_level = db.Column(db.Float, nullable=True)
+    kilometer = db.Column(db.Boolean, nullable=True)  # האם תומך בקילומטראז'
 
 # פונקציה שמבצעת חיפוש ברשומות ה-API של CKAN
 def fetch_vehicle_data(vehicle_number):
@@ -41,13 +50,22 @@ def fetch_vehicle_data(vehicle_number):
         print(f"Failed to retrieve data from CKAN API: {e}")
         return []
 
-# פונקציה לחיפוש רכב בדאטהבייס לפי מודל בלבד
-def search_vehicle_in_db(model):
+# פונקציה לחיפוש רכב רגיל בדאטהבייס לפי מודל
+def search_regular_vehicle_in_db(model):
     try:
         result = Vehicle.query.filter_by(model=model).first()
         return result
     except Exception as e:
-        print(f"Database search error: {e}")
+        print(f"Database search error (regular vehicle): {e}")
+        return None
+
+# פונקציה לחיפוש רכב חשמלי בדאטהבייס לפי מודל
+def search_electric_vehicle_in_db(model):
+    try:
+        result = ElectricVehicle.query.filter_by(model=model).first()
+        return result
+    except Exception as e:
+        print(f"Database search error (electric vehicle): {e}")
         return None
 
 @app.route('/', methods=['GET', 'POST'])
@@ -63,15 +81,19 @@ def index():
             if records:
                 model = records[0]['kinuy_mishari']
 
-                # חיפוש בדאטהבייס
-                db_record = search_vehicle_in_db(model)
-                
-                # בדיקה אם יש קריאת קילומטראז' או סוללה
+                # חיפוש בדאטהבייס לפי סוג רכב (חשמלי או רגיל)
+                db_record = search_electric_vehicle_in_db(model)
+                if not db_record:  # אם לא מצאנו ברכבים החשמליים, נחפש ברכבי בנזין
+                    db_record = search_regular_vehicle_in_db(model)
+
+                # בדיקה אם יש קריאת קילומטראז', סוללה או דלק
                 if db_record:
-                    if db_record.battery_level is not None:
+                    if hasattr(db_record, 'battery_level') and db_record.battery_level is not None:
                         print(f"Battery level: {db_record.battery_level}")
-                    elif db_record.fuel_level is not None:
+                    elif hasattr(db_record, 'fuel_level') and db_record.fuel_level is not None:
                         print(f"Fuel level: {db_record.fuel_level}")
+                    else:
+                        print("Kilometer support:", db_record.kilometer)
                 else:
                     print("No matching vehicle found in the database.")
             else:
@@ -84,3 +106,4 @@ def index():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
