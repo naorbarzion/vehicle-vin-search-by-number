@@ -1,46 +1,196 @@
-<!-- החלק הרלוונטי מעודכן -->
-<table>
-    <thead>
-        <tr>
-            <th>מספר רכב</th>
-            <th>מודל</th>
-            <th>יצרן</th>
-            <th>שנת ייצור</th>
-            <th>צבע</th>
-            <th>בעלות</th>
-            <th>תאריך בדיקה אחרונה</th>
-            <th>סוג דלק</th>
-            <th>מספר VIN</th>
-            <th>קריאת קילומטראז'/סוללה</th> <!-- עמודה חדשה -->
-            <th>פעולה</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for record in records %}
-        <tr>
-            <td data-label="מספר רכב">{{ record['mispar_rechev'] }}</td>
-            <td data-label="מודל">{{ record['kinuy_mishari'] }}</td>
-            <td data-label="יצרן">{{ record['tozeret_nm'] }}</td>
-            <td data-label="שנת ייצור">{{ record['shnat_yitzur'] }}</td>
-            <td data-label="צבע">{{ record['tzeva_rechev'] }}</td>
-            <td data-label="בעלות">{{ record['baalut'] }}</td>
-            <td data-label="תאריך בדיקה אחרונה">{{ record['mivchan_acharon_dt'] }}</td>
-            <td data-label="סוג דלק">{{ record['sug_delek_nm'] }}</td>
-            <td data-label="מספר VIN">{{ record['misgeret'] }}</td>
-            <!-- בדיקת ערכים מה-DB והצגתם -->
-            {% if db_record %}
-                {% if db_record.battery_level is not none %}
-                    <td data-label="קריאת סוללה">{{ db_record.battery_level }}</td>
-                {% elif db_record.fuel_level is not none %}
-                    <td data-label="קריאת דלק">{{ db_record.fuel_level }}</td>
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>רשימת רכבים</title>
+    <style>
+        /* עיצוב כללי */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* עיצוב החלק העליון */
+        .header {
+            background-color: #00a2ff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header img {
+            max-height: 80px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* עיצוב טופס */
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #00a2ff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #008fcc;
+        }
+
+        /* עיצוב טבלה */
+        table {
+            width: 90%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #00a2ff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        td {
+            background-color: #ffffff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* כפתור בטבלה */
+        .action-button {
+            background-color: #00a2ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background-color: #008fcc;
+        }
+
+        /* התאמה למובייל - עיצוב טבלה אנכית */
+        @media screen and (max-width: 768px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+
+            tr {
+                margin-bottom: 10px;
+                border-bottom: 2px solid #ddd;
+            }
+
+            td, th {
+                text-align: left;
+                padding-left: 50%;
+                position: relative;
+            }
+
+            td:before, th:before {
+                position: absolute;
+                left: 10px;
+                top: 10px;
+                white-space: nowrap;
+            }
+
+            /* כותרות שדה עבור מובייל */
+            td:before {
+                content: attr(data-label);
+                font-weight: bold;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- אזור הכותרת עם לוגו -->
+    <div class="header">
+        <img src="https://team.tracer.co.il/assets/logo.png" alt="Tracer Logo">
+    </div>
+
+    <h1>רשימת רכבים</h1>
+
+    <!-- טופס החיפוש -->
+    <form method="POST">
+        <input type="text" id="vehicle_number" name="vehicle_number" placeholder="הכנס מספר רכב..." required>
+        <button type="submit">חפש</button>
+    </form>
+
+    {% if records %}
+    <!-- הצגת תוצאות החיפוש -->
+    <table>
+        <thead>
+            <tr>
+                <th>מספר רכב</th>
+                <th>מודל</th>
+                <th>יצרן</th>
+                <th>שנת ייצור</th>
+                <th>צבע</th>
+                <th>בעלות</th>
+                <th>תאריך בדיקה אחרונה</th>
+                <th>סוג דלק</th>
+                <th>מספר VIN</th>
+                <th>קריאת קילומטראז'/סוללה</th> <!-- עמודה חדשה -->
+                <th>פעולה</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td data-label="מספר רכב">{{ record['mispar_rechev'] }}</td>
+                <td data-label="מודל">{{ record['kinuy_mishari'] }}</td>
+                <td data-label="יצרן">{{ record['tozeret_nm'] }}</td>
+                <td data-label="שנת ייצור">{{ record['shnat_yitzur'] }}</td>
+                <td data-label="צבע">{{ record['tzeva_rechev'] }}</td>
+                <td data-label="בעלות">{{ record['baalut'] }}</td>
+                <td data-label="תאריך בדיקה אחרונה">{{ record['mivchan_acharon_dt'] }}</td>
+                <td data-label="סוג דלק">{{ record['sug_delek_nm'] }}</td>
+                <td data-label="מספר VIN">{{ record['misgeret'] }}</td>
+                <!-- בדיקת ערכים מה-DB והצגתם -->
+                {% if db_record %}
+                    {% if db_record.battery_level is not none %}
+                        <td data-label="קריאת סוללה">{{ db_record.battery_level }}</td>
+                    {% elif db_record.fuel_level is not none %}
+                        <td data-label="קריאת דלק">{{ db_record.fuel_level }}</td>
+                    {% else %}
+                        <td>לא זמין</td>
+                    {% endif %}
                 {% else %}
                     <td>לא זמין</td>
                 {% endif %}
-            {% else %}
-                <td>לא זמין</td>
-            {% endif %}
-            <td data-label="פעולה"><button class="action-button">מחיקה</button></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                <td data-label="פעולה"><button class="action-button">מחיקה</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center;">לא נמצאו תוצאות.</p>
+    {% endif %}
+
+</body>
+</html>
