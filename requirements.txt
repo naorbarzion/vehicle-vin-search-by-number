@@ -2,3 +2,5 @@ Flask==2.1.2
 requests==2.27.1
 gunicorn==20.1.0
 Werkzeug==2.1.2
+psycopg2-binary==2.9.3  # נוסיף חיבור PostgreSQL
+Flask-SQLAlchemy==2.5.1  # נוסיף חיבור Flask ל-SQLAlchemy
