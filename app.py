@@ -5,34 +5,29 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# הגדרת החיבור ל-PostgreSQL
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://test:FPHmlbjPfYymNlQIHUgiBUPJuEc3L26z@dpg-crfln63v2p9s73d3pmo0-a.frankfurt-postgres.render.com/fmcvehicleslist')
+# הגדרת החיבור למסד הנתונים (PostgreSQL)
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://test:FPHmlbj1PYymNlQIHUgiBUPJuEc3L26z@dpg-crf1n63v2p9s73d3pmo0-a.frankfurt-postgres.render.com/fmcvehicleslist?sslmode=require"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
-# מודל לטבלת רכבים רגילים
+# מודל למסד הנתונים
 class Vehicle(db.Model):
     __tablename__ = 'fmc_vehicles_list'
     id = db.Column(db.Integer, primary_key=True)
-    make = db.Column(db.String(50))
-    model = db.Column(db.String(50))
-    date_start = db.Column(db.String(10))
-    date_end = db.Column(db.String(10))
-    kilometer = db.Column(db.Boolean)
-    fuel_level = db.Column(db.Boolean)
+    make = db.Column(db.String(100))
+    model = db.Column(db.String(100))
+    fuel_level = db.Column(db.Float, nullable=True)
+    battery_level = db.Column(db.Float, nullable=True)
 
-# מודל לטבלת רכבים חשמליים
 class ElectricVehicle(db.Model):
     __tablename__ = 'fmc_vehicles_list_electric'
     id = db.Column(db.Integer, primary_key=True)
-    make = db.Column(db.String(50))
-    model = db.Column(db.String(50))
-    date_start = db.Column(db.String(10))
-    date_end = db.Column(db.String(10))
-    kilometer = db.Column(db.Boolean)
-    battery_level = db.Column(db.Boolean)
+    make = db.Column(db.String(100))
+    model = db.Column(db.String(100))
+    battery_level = db.Column(db.Float, nullable=True)
 
-# CKAN API call function
+# פונקציה שמבצעת חיפוש ברשומות ה-API של CKAN
 def fetch_vehicle_data(vehicle_number):
     url = "https://data.gov.il/api/3/action/datastore_search"
     resource_id = "053cea08-09bc-40ec-8f7a-156f0677aff3"
@@ -46,39 +41,40 @@ def fetch_vehicle_data(vehicle_number):
         response = requests.get(url, params=params)
         data = response.json()
         if data.get('success'):
-            return data['result']['records']  # החזרת הרשומות מהתוצאה
+            return data['result']['records']
         else:
             return []
     except Exception as e:
         print(f"Failed to retrieve data: {e}")
         return []
 
-# פונקציה לחיפוש הרכב בדאטהבייס
+# פונקציה לחיפוש רכב בדאטהבייס
 def search_vehicle_in_db(make, model, is_electric):
-    if is_electric:
-        result = ElectricVehicle.query.filter_by(make=make, model=model).first()
-    else:
-        result = Vehicle.query.filter_by(make=make, model=model).first()
-    return result
+    try:
+        if is_electric:
+            result = ElectricVehicle.query.filter_by(make=make, model=model).first()
+        else:
+            result = Vehicle.query.filter_by(make=make, model=model).first()
+        return result
+    except Exception as e:
+        print(f"Database search error: {e}")
+        return None
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    records = []  # במקרה ואין חיפוש, תוגדר רשימה ריקה כדי למנוע שגיאה
+    records = None
     db_record = None
     if request.method == 'POST':
         vehicle_number = request.form.get('vehicle_number')
-        records = fetch_vehicle_data(vehicle_number)  # קבלת נתונים מה-API
+        records = fetch_vehicle_data(vehicle_number)
         
         if records:
-            # נבדוק את סוג הדלק של הרכב הראשון שמצאנו
-            model = records[0]['kinuy_mishari']
             make = records[0]['tozeret_nm']
+            model = records[0]['kinuy_mishari']
             fuel_type = records[0]['sug_delek_nm']
+            is_electric = (fuel_type == 'חשמל')
 
-            # קביעה אם הרכב חשמלי או לא
-            is_electric = 'חשמל' in fuel_type
-
-            # חיפוש המידע הנוסף בדאטהבייס
+            # חיפוש בדאטהבייס
             db_record = search_vehicle_in_db(make, model, is_electric)
 
     return render_template('index.html', records=records, db_record=db_record)
