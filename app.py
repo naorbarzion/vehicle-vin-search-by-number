@@ -12,15 +12,23 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# מודל למסד הנתונים
+# מודל למסד הנתונים עבור רכבים רגילים
 class Vehicle(db.Model):
     __tablename__ = 'fmc_vehicles_list'
     id = db.Column(db.Integer, primary_key=True)
     make = db.Column(db.String(100))
     model = db.Column(db.String(100))
     fuel_level = db.Column(db.Float, nullable=True)
+    kilometer = db.Column(db.Float, nullable=True)
+
+# מודל למסד הנתונים עבור רכבים חשמליים
+class ElectricVehicle(db.Model):
+    __tablename__ = 'fmc_vehicles_list_electric'
+    id = db.Column(db.Integer, primary_key=True)
+    make = db.Column(db.String(100))
+    model = db.Column(db.String(100))
     battery_level = db.Column(db.Float, nullable=True)
-    kilometer = db.Column(db.Boolean, nullable=True)
+    kilometer = db.Column(db.Float, nullable=True)
 
 # פונקציה שמבצעת חיפוש ברשומות ה-API של CKAN
 def fetch_vehicle_data(vehicle_number):
@@ -43,38 +51,34 @@ def fetch_vehicle_data(vehicle_number):
         print(f"Failed to retrieve data from CKAN API: {e}")
         return []
 
-# פונקציה לחיפוש רכב בדאטהבייס לפי מודל בלבד
-def search_vehicle_in_db(model):
-    try:
-        result = Vehicle.query.filter_by(model=model).first()
-        return result
-    except Exception as e:
-        print(f"Database search error: {e}")
-        return None
-
-# פונקציה לבדוק אם המודל נתמך בקובצי ה-CSV
+# פונקציה לבדיקת תמיכה בקילומטרז' ודלק/סוללה מתוך קבצי ה-CSV
 def check_model_support(model):
-    regular_vehicles_path = '/mnt/data/fmc_vehicles_list.csv'
-    electric_vehicles_path = '/mnt/data/fmc_vehicles_list_electric.csv'
-    
     try:
-        regular_df = pd.read_csv(regular_vehicles_path)
-        electric_df = pd.read_csv(electric_vehicles_path)
-        
-        # בדיקה בקובץ הרכבים הרגילים
-        regular_vehicle = regular_df[regular_df['Model'].str.lower() == model.lower()]
-        if not regular_vehicle.empty:
-            kilometer_supported = regular_vehicle['Kilometer'].values[0] == '+'
-            fuel_supported = regular_vehicle['Fuel, l'].values[0] == '+'
-            return {'kilometer': kilometer_supported, 'fuel': fuel_supported}
-        
-        # בדיקה בקובץ הרכבים החשמליים
-        electric_vehicle = electric_df[electric_df['Model'].str.lower() == model.lower()]
-        if not electric_vehicle.empty:
-            kilometer_supported = electric_vehicle['Kilometer'].values[0] == '+'
-            battery_supported = electric_vehicle['Battery'].values[0] == '+'
-            return {'kilometer': kilometer_supported, 'battery': battery_supported}
-        
+        csv_path_regular = '/mnt/data/database/fmc_vehicles_list.csv'
+        csv_path_electric = '/mnt/data/database/fmc_vehicles_list_electric.csv'
+
+        # חיפוש במאגר הרגיל
+        if os.path.exists(csv_path_regular):
+            df_regular = pd.read_csv(csv_path_regular)
+            if model in df_regular['Model'].values:
+                model_data = df_regular[df_regular['Model'] == model].iloc[0]
+                return {
+                    'kilometer_support': model_data['Kilometer'] == '+',
+                    'fuel_support': model_data['Fuel, l'] == '+',
+                    'type': 'regular'
+                }
+
+        # חיפוש במאגר החשמלי
+        if os.path.exists(csv_path_electric):
+            df_electric = pd.read_csv(csv_path_electric)
+            if model in df_electric['Model'].values:
+                model_data = df_electric[df_electric['Model'] == model].iloc[0]
+                return {
+                    'kilometer_support': model_data['Kilometer'] == '+',
+                    'battery_support': model_data['Battery, %'] == '+',
+                    'type': 'electric'
+                }
+
         return None
     except Exception as e:
         print(f"Error while checking model support: {e}")
@@ -84,7 +88,6 @@ def check_model_support(model):
 def index():
     records = None
     db_record = None
-    model_support = None
     error_message = None
     if request.method == 'POST':
         try:
@@ -93,32 +96,31 @@ def index():
             
             if records:
                 model = records[0]['kinuy_mishari']
-                
-                # בדיקה אם המודל נתמך בקובצי ה-CSV
+
+                # בדיקת תמיכה בקילומטרז' ודלק/סוללה
                 model_support = check_model_support(model)
-                
                 if model_support:
-                    print(f"Model support found: {model_support}")
+                    if model_support['type'] == 'electric':
+                        db_record = ElectricVehicle.query.filter_by(model=model).first()
+                    else:
+                        db_record = Vehicle.query.filter_by(model=model).first()
+
+                    if db_record:
+                        if 'battery_support' in model_support and db_record.battery_level is not None:
+                            print(f"Battery level: {db_record.battery_level}")
+                        elif 'fuel_support' in model_support and db_record.fuel_level is not None:
+                            print(f"Fuel level: {db_record.fuel_level}")
+                    else:
+                        print("No matching vehicle found in the database.")
                 else:
-                    print("Model not found in CSV files.")
-                    
-                # חיפוש בדאטהבייס
-                db_record = search_vehicle_in_db(model)
-                
-                if db_record:
-                    if db_record.battery_level is not None:
-                        print(f"Battery level: {db_record.battery_level}")
-                    elif db_record.fuel_level is not None:
-                        print(f"Fuel level: {db_record.fuel_level}")
-                else:
-                    print("No matching vehicle found in the database.")
+                    error_message = "No support information found for the given model."
             else:
                 error_message = "No records found in the CKAN API for the given vehicle number."
         except Exception as e:
             error_message = f"An error occurred: {e}"
             print(f"An error occurred in the index function: {e}")
 
-    return render_template('index.html', records=records, db_record=db_record, model_support=model_support, error_message=error_message)
+    return render_template('index.html', records=records, db_record=db_record, error_message=error_message)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
