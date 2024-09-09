@@ -63,7 +63,7 @@ def search_vehicle_in_db(make, model, is_electric):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    records = None
+    records = []  # במקרה ואין חיפוש, תוגדר רשימה ריקה כדי למנוע שגיאה
     db_record = None
     if request.method == 'POST':
         vehicle_number = request.form.get('vehicle_number')
