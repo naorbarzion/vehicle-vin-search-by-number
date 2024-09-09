@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, render_template
 import requests
 from flask_sqlalchemy import SQLAlchemy
+import csv
 
 app = Flask(__name__)
 
@@ -68,11 +69,57 @@ def search_electric_vehicle_in_db(model):
         print(f"Database search error (electric vehicle): {e}")
         return None
 
+# פונקציה ליצירת הטבלאות במידה והן לא קיימות
+def create_tables_if_not_exist():
+    try:
+        db.create_all()  # זה יוצר את הטבלאות אם הן לא קיימות
+        print("Tables checked and created if not exist.")
+    except Exception as e:
+        print(f"Error while creating tables: {e}")
+
+# פונקציה ליבוא נתונים מתוך קובץ CSV
+def import_data_from_csv():
+    try:
+        if not Vehicle.query.first():  # אם אין נתונים, נייבא מה-CSV
+            with open('/mnt/data/fmc_vehicles_list.csv', newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    vehicle = Vehicle(
+                        make=row['Make'],
+                        model=row['Model'],
+                        fuel_level=None,  # אם יש עמודת fuel_level ב-CSV, עדכן כאן
+                        kilometer=(row['Kilometer'] == '+')  # נבדוק אם יש תמיכה בקילומטראז'
+                    )
+                    db.session.add(vehicle)
+                db.session.commit()
+
+        if not ElectricVehicle.query.first():  # אם אין נתונים, נייבא מה-CSV של רכבי חשמל
+            with open('/mnt/data/fmc_vehicles_list_electric.csv', newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    ev = ElectricVehicle(
+                        make=row['Make'],
+                        model=row['Model'],
+                        battery_level=None,  # אם יש עמודת battery_level ב-CSV, עדכן כאן
+                        kilometer=(row['Kilometer'] == '+')  # נבדוק אם יש תמיכה בקילומטראז'
+                    )
+                    db.session.add(ev)
+                db.session.commit()
+
+        print("Data imported successfully from CSV.")
+    except Exception as e:
+        print(f"Error while importing data from CSV: {e}")
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     records = None
     db_record = None
     error_message = None
+
+    # נוודא שהטבלאות קיימות ונייבא נתונים אם צריך
+    create_tables_if_not_exist()
+    import_data_from_csv()
+
     if request.method == 'POST':
         try:
             vehicle_number = request.form.get('vehicle_number')
@@ -106,4 +153,3 @@ def index():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
