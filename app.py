@@ -54,8 +54,8 @@ def fetch_vehicle_data(vehicle_number):
 # פונקציה לבדיקת תמיכה בקילומטרז' ודלק/סוללה מתוך קבצי ה-CSV
 def check_model_support(model):
     try:
-        csv_path_regular = '/mnt/data/database/fmc_vehicles_list.csv'
-        csv_path_electric = '/mnt/data/database/fmc_vehicles_list_electric.csv'
+        csv_path_regular = 'database/fmc_vehicles_list.csv'
+        csv_path_electric = 'database/fmc_vehicles_list_electric.csv'
 
         # חיפוש במאגר הרגיל
         if os.path.exists(csv_path_regular):
@@ -75,7 +75,7 @@ def check_model_support(model):
                 model_data = df_electric[df_electric['Model'] == model].iloc[0]
                 return {
                     'kilometer_support': model_data['Kilometer'] == '+',
-                    'battery_support': model_data['Battery, %'] == '+',
+                    'battery_support': model_data['Fuel, %'] == '+',
                     'type': 'electric'
                 }
 
@@ -89,6 +89,7 @@ def index():
     records = None
     db_record = None
     error_message = None
+    model_support = None
     if request.method == 'POST':
         try:
             vehicle_number = request.form.get('vehicle_number')
@@ -120,7 +121,7 @@ def index():
             error_message = f"An error occurred: {e}"
             print(f"An error occurred in the index function: {e}")
 
-    return render_template('index.html', records=records, db_record=db_record, error_message=error_message)
+    return render_template('index.html', records=records, db_record=db_record, error_message=error_message, model_support=model_support)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
