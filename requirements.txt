@@ -5,3 +5,4 @@ Werkzeug==2.1.2
 psycopg2-binary==2.9.3
 Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.46  # שימוש בגרסה ישנה יותר של SQLAlchemy
+pandas==1.5.3  # או הגרסה העדכנית ביותר שנמצאה מתאימה לפרויקט שלך
