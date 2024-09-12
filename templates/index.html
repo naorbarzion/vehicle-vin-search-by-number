@@ -141,8 +141,8 @@
         <button type="submit">חפש</button>
     </form>
 
-    <!-- תוצאות מה-API -->
-    <h2 style="text-align: center;">תוצאות מה-API:</h2>
+    <!-- פרטי רכב מהמאגר הממשלתי (תוצאות API) -->
+    <h2 style="text-align: center;">פרטי רכב מהמאגר הממשלתי:</h2>
     {% if records %}
     <table>
         <thead>
@@ -173,19 +173,19 @@
         </tbody>
     </table>
     {% else %}
-    <p style="text-align: center;">לא נמצאו תוצאות ב-API.</p>
+    <p style="text-align: center;">לא נמצאו תוצאות במאגר הממשלתי.</p>
     {% endif %}
 
-    <!-- תוצאות מהמאגר המקומי (CSV) -->
-    <h2 style="text-align: center;">תוצאות מהמאגר המקומי (CSV):</h2>
+    <!-- תמיכה במכשירי FMC (תוצאות מהמאגר המקומי) -->
+    <h2 style="text-align: center;">תמיכה במכשירי FMC:</h2>
     {% if db_record is not none %}
     <table>
         <thead>
             <tr>
                 <th>מודל</th>
                 <th>יצרן</th>
-                <th>שנת ייצור</th>
-                <th>קריאת סוללה/דלק</th>
+                <th>קריאת קילומטראז'</th>
+                <th>קריאת דלק/סוללה</th>
             </tr>
         </thead>
         <tbody>
@@ -193,7 +193,13 @@
             <tr>
                 <td>{{ row['Model'] }}</td>
                 <td>{{ row['Make'] }}</td>
-                <td>{{ row['Date - Start'] }}</td>
+                <td>
+                    {% if 'Kilometer' in row and row['Kilometer'] is not none %}
+                        {{ row['Kilometer'] }}
+                    {% else %}
+                        לא זמין
+                    {% endif %}
+                </td>
                 <td>
                     {% if 'Battery Level' in row and row['Battery Level'] is not none %}
                         {{ row['Battery Level'] }}
