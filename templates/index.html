@@ -32,7 +32,7 @@
             font-size: 1.5em;
             font-weight: bold;
             margin-top: 30px;
-            text-align: center; /* Center-aligning the section headers */
+            text-align: center;
         }
 
         form {
@@ -128,20 +128,17 @@
 </head>
 <body>
 
-    <!-- Header with logo -->
     <div class="header">
         <img src="https://team.tracer.co.il/assets/logo.png" alt="Tracer Logo">
     </div>
 
     <h1>רשימת רכבים</h1>
 
-    <!-- Search form -->
     <form method="POST">
         <input type="text" id="vehicle_number" name="vehicle_number" placeholder="הכנס מספר רכב..." required>
         <button type="submit">חפש</button>
     </form>
 
-    <!-- API results section -->
     <div class="section-title">תוצאות מה-API:</div>
     {% if records %}
     <table>
@@ -178,25 +175,25 @@
     <p style="text-align: center;">לא נמצאו תוצאות מה-API.</p>
     {% endif %}
 
-    <!-- CSV results section -->
     <div class="section-title">תוצאות מהמאגר המקומי (CSV):</div>
     {% if db_record %}
     <table>
         <thead>
             <tr>
                 <th>מודל</th>
+                <th>קר
                 <th>קריאת סוללה/דלק</th>
             </tr>
         </thead>
         <tbody>
-            {% for row in db_record.itertuples() %}
+            {% for index, row in db_record.iterrows() %}
             <tr>
-                <td data-label="מודל">{{ row.Model }}</td>
+                <td data-label="מודל">{{ row['Model'] }}</td>
                 <td data-label="קריאת סוללה/דלק">
-                    {% if row.Battery\r\nLevel is not none %}
-                        {{ row.Battery\r\nLevel }}
-                    {% elif row.Fuel_l is not none %}
-                        {{ row.Fuel_l }}
+                    {% if row.get('Battery Level') %}
+                        {{ row['Battery Level'] }}
+                    {% elif row.get('Fuel, l') %}
+                        {{ row['Fuel, l'] }}
                     {% else %}
                         לא זמין
                     {% endif %}
@@ -206,7 +203,7 @@
         </tbody>
     </table>
     {% else %}
-    <p style="text-align: center;">לא נמצאו תוצאות במאגר המקומי (CSV).</p>
+    <p style="text-align: center;">לא נמצאו תוצאות מהמאגר המקומי (CSV).</p>
     {% endif %}
 
 </body>
