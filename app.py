@@ -6,27 +6,28 @@ import logging
 
 app = Flask(__name__)
 
-# הגדרת הלוגים להצגת שגיאות
-logging.basicConfig(level=logging.DEBUG)
+# הגדרת הלוגים
+logging.basicConfig(level=logging.INFO)
 
-# פונקציה לקריאת נתונים מה-CSV ולניקוי רווחים מיותרים
+# פונקציה לקריאת הנתונים מה-CSV ולניקוי הרווחים
 def read_vehicle_data_from_csv(csv_file_path):
     try:
-        # קריאת הנתונים מה-CSV
+        # קריאת הנתונים מה-CSV והסרת רווחים לפני ואחרי המודל
         data = pd.read_csv(csv_file_path)
-        logging.info(f"Successfully read data from {csv_file_path}")
+        data['Model'] = data['Model'].str.strip()
         
-        # הצגת 5 השורות הראשונות בלוג כדי לוודא שהכל תקין
+        # תיקון שמות עמודות אם יש בעיה עם תווים כמו \r\n
+        data.columns = [col.replace('\r\n', ' ') for col in data.columns]
+
+        logging.info(f"Successfully read data from {csv_file_path}")
         logging.info(f"First 5 rows from {csv_file_path}:\n{data.head()}")
         
-        # ניקוי רווחים מיותרים מכל עמודת המודל
-        data['Model'] = data['Model'].str.strip()  # הסרת רווחים לפני ואחרי השם
         return data
     except Exception as e:
         logging.error(f"Error reading CSV file {csv_file_path}: {e}")
         return None
 
-# פונקציה לחיפוש המודל ב-CSV המתאים
+# פונקציה לחיפוש המודל ב-CSV לפי סוג דלק
 def search_vehicle_in_csv(model, fuel_type):
     csv_file_path = ''
     if fuel_type == 'חשמל':
@@ -34,19 +35,15 @@ def search_vehicle_in_csv(model, fuel_type):
     else:
         csv_file_path = 'database/fmc_vehicles_list.csv'
     
-    logging.info(f"Searching for model {model} in {fuel_type} database.")
-    
-    # קריאה לנתוני ה-CSV
     vehicle_data = read_vehicle_data_from_csv(csv_file_path)
     
     if vehicle_data is not None:
-        # ניקוי רווחים מהמודל שהתקבל מהמשתמש
-        clean_model = model.strip()  # הסרת רווחים מיותרים לפני ואחרי המודל
+        clean_model = model.strip()  # ניקוי רווחים מיותרים לפני ואחרי המודל
         result = vehicle_data[vehicle_data['Model'].str.contains(clean_model, case=False, na=False)]
         
         if not result.empty:
             logging.info(f"Found matching vehicle for model {clean_model} in the {fuel_type} database.")
-            return result.to_dict(orient='records')  # החזרת התוצאות כרשימה של מילונים
+            return result
         else:
             logging.info(f"No matching vehicle found for model {clean_model} in the {fuel_type} database.")
             return None
@@ -67,10 +64,11 @@ def fetch_vehicle_data(vehicle_number):
     try:
         response = requests.get(url, params=params)
         data = response.json()
-        logging.info(f"Fetched data from CKAN API for vehicle number {vehicle_number}")
         if data.get('success'):
+            logging.info(f"Fetched data from CKAN API for vehicle number {vehicle_number}")
             return data['result']['records']
         else:
+            logging.warning(f"No data found in CKAN API for vehicle number {vehicle_number}")
             return []
     except Exception as e:
         logging.error(f"Failed to retrieve data from CKAN API: {e}")
@@ -83,29 +81,20 @@ def index():
     error_message = None
     
     if request.method == 'POST':
-        try:
-            vehicle_number = request.form.get('vehicle_number')
-            logging.debug(f"Vehicle number entered: {vehicle_number}")
-            records = fetch_vehicle_data(vehicle_number)
+        vehicle_number = request.form.get('vehicle_number')
+        logging.debug(f"Vehicle number entered: {vehicle_number}")
+        
+        # קריאה ל-API
+        records = fetch_vehicle_data(vehicle_number)
+        
+        if records:
+            model = records[0].get('kinuy_mishari', '').strip()
+            fuel_type = records[0].get('sug_delek_nm', '').strip()
             
-            if records:
-                model = records[0]['kinuy_mishari'].strip()  # ניקוי רווחים מהמחרוזת שמגיעה מה-API
-                fuel_type = records[0]['sug_delek_nm'].strip()  # סוג דלק - משמש לבחירת ה-CSV המתאים
-
-                logging.info(f"Model: {model}, Fuel Type: {fuel_type}")
-
-                # חיפוש ב-CSV לפי המודל וסוג הדלק
-                db_record = search_vehicle_in_csv(model, fuel_type)
-                
-                if db_record is None:
-                    error_message = "No matching vehicle found in the database."
-            else:
-                error_message = "No records found in the CKAN API for the given vehicle number."
-        except Exception as e:
-            error_message = f"An error occurred: {e}"
-            logging.error(f"An error occurred in the index function: {e}")
-
+            # חיפוש המודל ב-CSV לפי סוג דלק
+            db_record = search_vehicle_in_csv(model, fuel_type)
+    
     return render_template('index.html', records=records, db_record=db_record, error_message=error_message)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(debug=True)
