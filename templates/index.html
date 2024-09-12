@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>רשימת רכבים</title>
     <style>
+        /* עיצוב כללי */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -12,6 +13,7 @@
             padding: 0;
         }
 
+        /* עיצוב החלק העליון */
         .header {
             background-color: #00a2ff;
             padding: 20px;
@@ -28,13 +30,7 @@
             margin-top: 20px;
         }
 
-        .section-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-top: 30px;
-            text-align: center;
-        }
-
+        /* עיצוב טופס */
         form {
             text-align: center;
             margin-bottom: 20px;
@@ -59,6 +55,7 @@
             background-color: #008fcc;
         }
 
+        /* עיצוב טבלה */
         table {
             width: 90%;
             margin: 0 auto;
@@ -83,6 +80,7 @@
             text-align: center;
         }
 
+        /* כפתור בטבלה */
         .action-button {
             background-color: #00a2ff;
             color: white;
@@ -95,6 +93,7 @@
             background-color: #008fcc;
         }
 
+        /* התאמה למובייל - עיצוב טבלה אנכית */
         @media screen and (max-width: 768px) {
             table, thead, tbody, th, td, tr {
                 display: block;
@@ -119,6 +118,7 @@
                 white-space: nowrap;
             }
 
+            /* כותרות שדה עבור מובייל */
             td:before {
                 content: attr(data-label);
                 font-weight: bold;
@@ -128,18 +128,21 @@
 </head>
 <body>
 
+    <!-- אזור הכותרת עם לוגו -->
     <div class="header">
         <img src="https://team.tracer.co.il/assets/logo.png" alt="Tracer Logo">
     </div>
 
     <h1>רשימת רכבים</h1>
 
+    <!-- טופס החיפוש -->
     <form method="POST">
         <input type="text" id="vehicle_number" name="vehicle_number" placeholder="הכנס מספר רכב..." required>
         <button type="submit">חפש</button>
     </form>
 
-    <div class="section-title">תוצאות מה-API:</div>
+    <!-- תוצאות מה-API -->
+    <h2 style="text-align: center;">תוצאות מה-API:</h2>
     {% if records %}
     <table>
         <thead>
@@ -156,43 +159,45 @@
             </tr>
         </thead>
         <tbody>
-            {% for record in records %}
             <tr>
-                <td data-label="מספר רכב">{{ record['mispar_rechev'] }}</td>
-                <td data-label="מודל">{{ record['kinuy_mishari'] }}</td>
-                <td data-label="יצרן">{{ record['tozeret_nm'] }}</td>
-                <td data-label="שנת ייצור">{{ record['shnat_yitzur'] }}</td>
-                <td data-label="צבע">{{ record['tzeva_rechev'] }}</td>
-                <td data-label="בעלות">{{ record['baalut'] }}</td>
-                <td data-label="תאריך בדיקה אחרונה">{{ record['mivchan_acharon_dt'] }}</td>
-                <td data-label="סוג דלק">{{ record['sug_delek_nm'] }}</td>
-                <td data-label="מספר VIN">{{ record['misgeret'] }}</td>
+                <td>{{ records[0]['mispar_rechev'] }}</td>
+                <td>{{ records[0]['kinuy_mishari'] }}</td>
+                <td>{{ records[0]['tozeret_nm'] }}</td>
+                <td>{{ records[0]['shnat_yitzur'] }}</td>
+                <td>{{ records[0]['tzeva_rechev'] }}</td>
+                <td>{{ records[0]['baalut'] }}</td>
+                <td>{{ records[0]['mivchan_acharon_dt'] }}</td>
+                <td>{{ records[0]['sug_delek_nm'] }}</td>
+                <td>{{ records[0]['misgeret'] }}</td>
             </tr>
-            {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <p style="text-align: center;">לא נמצאו תוצאות מה-API.</p>
+    <p style="text-align: center;">לא נמצאו תוצאות ב-API.</p>
     {% endif %}
 
-    <div class="section-title">תוצאות מהמאגר המקומי (CSV):</div>
-    {% if db_record %}
+    <!-- תוצאות מהמאגר המקומי (CSV) -->
+    <h2 style="text-align: center;">תוצאות מהמאגר המקומי (CSV):</h2>
+    {% if db_record is not none %}
     <table>
         <thead>
             <tr>
                 <th>מודל</th>
-                <th>קר
+                <th>יצרן</th>
+                <th>שנת ייצור</th>
                 <th>קריאת סוללה/דלק</th>
             </tr>
         </thead>
         <tbody>
             {% for index, row in db_record.iterrows() %}
             <tr>
-                <td data-label="מודל">{{ row['Model'] }}</td>
-                <td data-label="קריאת סוללה/דלק">
-                    {% if row.get('Battery Level') %}
+                <td>{{ row['Model'] }}</td>
+                <td>{{ row['Make'] }}</td>
+                <td>{{ row['Date - Start'] }}</td>
+                <td>
+                    {% if 'Battery Level' in row and row['Battery Level'] is not none %}
                         {{ row['Battery Level'] }}
-                    {% elif row.get('Fuel, l') %}
+                    {% elif 'Fuel, l' in row and row['Fuel, l'] is not none %}
                         {{ row['Fuel, l'] }}
                     {% else %}
                         לא זמין
@@ -203,7 +208,7 @@
         </tbody>
     </table>
     {% else %}
-    <p style="text-align: center;">לא נמצאו תוצאות מהמאגר המקומי (CSV).</p>
+    <p style="text-align: center;">לא נמצאו תוצאות במאגר המקומי.</p>
     {% endif %}
 
 </body>
