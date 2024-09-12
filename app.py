@@ -6,8 +6,8 @@ import logging
 
 app = Flask(__name__)
 
-# הגדרת הלוגים
-logging.basicConfig(level=logging.INFO)
+# הגדרת הלוגים להצגת שגיאות
+logging.basicConfig(level=logging.DEBUG)
 
 # פונקציה לקריאת נתונים מה-CSV ולניקוי רווחים מיותרים
 def read_vehicle_data_from_csv(csv_file_path):
@@ -34,6 +34,8 @@ def search_vehicle_in_csv(model, fuel_type):
     else:
         csv_file_path = 'database/fmc_vehicles_list.csv'
     
+    logging.info(f"Searching for model {model} in {fuel_type} database.")
+    
     # קריאה לנתוני ה-CSV
     vehicle_data = read_vehicle_data_from_csv(csv_file_path)
     
@@ -44,7 +46,7 @@ def search_vehicle_in_csv(model, fuel_type):
         
         if not result.empty:
             logging.info(f"Found matching vehicle for model {clean_model} in the {fuel_type} database.")
-            return result
+            return result.to_dict(orient='records')  # החזרת התוצאות כרשימה של מילונים
         else:
             logging.info(f"No matching vehicle found for model {clean_model} in the {fuel_type} database.")
             return None
@@ -65,6 +67,7 @@ def fetch_vehicle_data(vehicle_number):
     try:
         response = requests.get(url, params=params)
         data = response.json()
+        logging.info(f"Fetched data from CKAN API for vehicle number {vehicle_number}")
         if data.get('success'):
             return data['result']['records']
         else:
@@ -82,11 +85,14 @@ def index():
     if request.method == 'POST':
         try:
             vehicle_number = request.form.get('vehicle_number')
+            logging.debug(f"Vehicle number entered: {vehicle_number}")
             records = fetch_vehicle_data(vehicle_number)
             
             if records:
                 model = records[0]['kinuy_mishari'].strip()  # ניקוי רווחים מהמחרוזת שמגיעה מה-API
                 fuel_type = records[0]['sug_delek_nm'].strip()  # סוג דלק - משמש לבחירת ה-CSV המתאים
+
+                logging.info(f"Model: {model}, Fuel Type: {fuel_type}")
 
                 # חיפוש ב-CSV לפי המודל וסוג הדלק
                 db_record = search_vehicle_in_csv(model, fuel_type)
