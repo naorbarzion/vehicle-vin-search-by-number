@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>רשימת רכבים</title>
     <style>
-        /* עיצוב כללי */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -13,7 +12,6 @@
             padding: 0;
         }
 
-        /* עיצוב החלק העליון */
         .header {
             background-color: #00a2ff;
             padding: 20px;
@@ -30,7 +28,6 @@
             margin-top: 20px;
         }
 
-        /* עיצוב טופס */
         form {
             text-align: center;
             margin-bottom: 20px;
@@ -55,7 +52,6 @@
             background-color: #008fcc;
         }
 
-        /* עיצוב טבלה */
         table {
             width: 90%;
             margin: 0 auto;
@@ -80,7 +76,6 @@
             text-align: center;
         }
 
-        /* כפתור בטבלה */
         .action-button {
             background-color: #00a2ff;
             color: white;
@@ -93,7 +88,6 @@
             background-color: #008fcc;
         }
 
-        /* התאמה למובייל - עיצוב טבלה אנכית */
         @media screen and (max-width: 768px) {
             table, thead, tbody, th, td, tr {
                 display: block;
@@ -118,7 +112,6 @@
                 white-space: nowrap;
             }
 
-            /* כותרות שדה עבור מובייל */
             td:before {
                 content: attr(data-label);
                 font-weight: bold;
@@ -128,21 +121,18 @@
 </head>
 <body>
 
-    <!-- אזור הכותרת עם לוגו -->
     <div class="header">
         <img src="https://team.tracer.co.il/assets/logo.png" alt="Tracer Logo">
     </div>
 
     <h1>רשימת רכבים</h1>
 
-    <!-- טופס החיפוש -->
     <form method="POST">
         <input type="text" id="vehicle_number" name="vehicle_number" placeholder="הכנס מספר רכב..." required>
         <button type="submit">חפש</button>
     </form>
 
     {% if records %}
-    <!-- הצגת תוצאות החיפוש -->
     <table>
         <thead>
             <tr>
@@ -171,19 +161,22 @@
                 <td data-label="תאריך בדיקה אחרונה">{{ record['mivchan_acharon_dt'] }}</td>
                 <td data-label="סוג דלק">{{ record['sug_delek_nm'] }}</td>
                 <td data-label="מספר VIN">{{ record['misgeret'] }}</td>
+
                 <!-- בדיקת ערכים מה-DB והצגתם -->
-                {% if db_record %}
-                    {% if db_record.battery_level is not none %}
-                        <td data-label="קריאת סוללה">{{ db_record.battery_level }}</td>
-                    {% elif db_record.fuel_level is not none %}
-                        <td data-label="קריאת דלק">{{ db_record.fuel_level }}</td>
-                    {% else %}
-                        <td>לא זמין</td>
-                    {% endif %}
+                {% if db_record is not none %}
+                    <td data-label="קריאת קילומטראז'/סוללה">
+                        {% if db_record['battery_level'].notnull().any() %}
+                            {{ db_record['battery_level'].values[0] }} (סוללה)
+                        {% elif db_record['fuel_level'].notnull().any() %}
+                            {{ db_record['fuel_level'].values[0] }} (דלק)
+                        {% else %}
+                            לא זמין
+                        {% endif %}
+                    </td>
                 {% else %}
                     <td>לא זמין</td>
                 {% endif %}
-                <td data-label="פעולה"><button class="action-button">מחיקה</button></td>
+                <td><button class="action-button">מחיקה</button></td>
             </tr>
             {% endfor %}
         </tbody>
