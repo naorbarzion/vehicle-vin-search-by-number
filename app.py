@@ -1,8 +1,9 @@
 import os
 import pandas as pd
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, send_file
 import requests
 import logging
+from io import StringIO
 
 app = Flask(__name__)
 
@@ -41,6 +42,9 @@ def search_vehicle_in_csv(model, fuel_type):
 
 # פונקציה לחיפוש ב-API של CKAN
 def fetch_vehicle_data(vehicle_number):
+    # ניקוי מקפים ממספר הרכב לחיפוש תקין
+    vehicle_number = vehicle_number.replace("-", "")
+    
     url = "https://data.gov.il/api/3/action/datastore_search"
     resource_id = "053cea08-09bc-40ec-8f7a-156f0677aff3"
 
@@ -92,6 +96,32 @@ def index():
             error_message = "לא הוזנו מספרי רכבים תקינים."
 
     return render_template('index.html', all_results=all_results, error_message=error_message)
+
+# פונקציה להורדת תוצאות כ-CSV
+@app.route('/download_csv')
+def download_csv():
+    # כאן ניצור את התוכן של קובץ ה-CSV להורדה
+    vehicle_numbers_raw = request.args.get('vehicle_numbers')
+    vehicle_numbers = [num.strip() for num in vehicle_numbers_raw.splitlines() if num.strip()]
+    all_results = process_vehicle_numbers(vehicle_numbers)
+
+    # יצירת CSV מתוך התוצאות
+    output = StringIO()
+    output.write("מספר רכב,מודל,יצרן,קריאת קילומטראז',קריאת דלק/סוללה\n")
+    for result in all_results:
+        vehicle_number = result['vehicle_number']
+        if result['records']:
+            model = result['records'][0].get('kinuy_mishari', 'לא נמצאו תוצאות')
+            make = result['records'][0].get('tozeret_nm', 'לא נמצאו תוצאות')
+            kilometer = result['records'][0].get('Kilometer', 'לא זמין')
+            fuel = result['records'][0].get('Fuel, l', 'לא זמין')
+            output.write(f"{vehicle_number},{model},{make},{kilometer},{fuel}\n")
+        else:
+            output.write(f"{vehicle_number},לא נמצאו תוצאות,לא נמצאו תוצאות,לא זמין,לא זמין\n")
+
+    # הכנה להורדה כ-CSV
+    output.seek(0)
+    return send_file(output, mimetype='text/csv', as_attachment=True, download_name='vehicle_search_results.csv')
 
 if __name__ == '__main__':
     app.run(debug=True)
