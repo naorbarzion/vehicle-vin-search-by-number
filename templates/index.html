@@ -81,6 +81,11 @@
             text-align: center;
         }
 
+        /* תצוגה של רכבים לא נתמכים */
+        .unsupported {
+            background-color: #ffcccc;
+        }
+
         /* התאמה למובייל */
         @media screen and (max-width: 768px) {
             table, thead, tbody, th, td, tr {
@@ -128,7 +133,7 @@
         <button type="submit">חפש</button>
     </form>
 
-    <!-- פרטי רכב מהמאגר הממשלתי (תוצאות API) -->
+    <!-- תוצאות API -->
     <h2 style="text-align: center;">פרטי רכבים מהמאגר הממשלתי:</h2>
     {% if records %}
     <table>
@@ -147,7 +152,7 @@
         </thead>
         <tbody>
             {% for record in records %}
-            <tr>
+            <tr class="{% if record in unsupported_vehicles %}unsupported{% endif %}">
                 <td>{{ record['mispar_rechev'] }}</td>
                 <td>{{ record['kinuy_mishari'] }}</td>
                 <td>{{ record['tozeret_nm'] }}</td>
@@ -161,6 +166,10 @@
             {% endfor %}
         </tbody>
     </table>
+    <p style="text-align: center;">
+        רכבים נתמכים: {{ supported_count }}<br>
+        רכבים לא נתמכים: {{ unsupported_count }}
+    </p>
     {% else %}
     <p style="text-align: center;">לא נמצאו תוצאות במאגר הממשלתי.</p>
     {% endif %}
