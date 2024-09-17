@@ -12,23 +12,18 @@ logging.basicConfig(level=logging.INFO)
 # פונקציה לקריאת הנתונים מה-CSV ולניקוי הרווחים
 def read_vehicle_data_from_csv(csv_file_path):
     try:
-        # קריאת הנתונים מה-CSV והסרת רווחים לפני ואחרי המודל
         data = pd.read_csv(csv_file_path)
         data['Model'] = data['Model'].str.strip()
-        
-        # תיקון שמות עמודות אם יש בעיה עם תווים כמו \r\n
         data.columns = [col.replace('\r\n', ' ') for col in data.columns]
-
         logging.info(f"Successfully read data from {csv_file_path}")
         logging.info(f"First 5 rows from {csv_file_path}:\n{data.head()}")
-        
         return data
     except Exception as e:
         logging.error(f"Error reading CSV file {csv_file_path}: {e}")
         return None
 
-# פונקציה לחיפוש המודל ב-CSV לפי סוג דלק
-def search_vehicle_in_csv(model, fuel_type):
+# פונקציה לחיפוש חכם במודל ב-CSV לפי סוג דלק
+def smart_search_vehicle_in_csv(model, fuel_type):
     csv_file_path = ''
     if fuel_type == 'חשמל':
         csv_file_path = 'database/fmc_vehicles_list_electric.csv'
@@ -38,8 +33,17 @@ def search_vehicle_in_csv(model, fuel_type):
     vehicle_data = read_vehicle_data_from_csv(csv_file_path)
     
     if vehicle_data is not None:
-        clean_model = model.strip()  # ניקוי רווחים מיותרים לפני ואחרי המודל
+        clean_model = model.strip()
         result = vehicle_data[vehicle_data['Model'].str.contains(clean_model, case=False, na=False)]
+        
+        # אם לא נמצאה תוצאה מלאה, נתחיל לחפש התאמות חלקיות
+        if result.empty:
+            for i in range(len(clean_model), 0, -1):
+                partial_model = clean_model[:i]
+                result = vehicle_data[vehicle_data['Model'].str.contains(partial_model, case=False, na=False)]
+                if not result.empty:
+                    logging.info(f"Found partial match for model {clean_model} as {partial_model} in the {fuel_type} database.")
+                    return result
         
         if not result.empty:
             logging.info(f"Found matching vehicle for model {clean_model} in the {fuel_type} database.")
@@ -74,27 +78,38 @@ def fetch_vehicle_data(vehicle_number):
         logging.error(f"Failed to retrieve data from CKAN API: {e}")
         return []
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    records = None
-    db_record = None
-    error_message = None
-    
-    if request.method == 'POST':
-        vehicle_number = request.form.get('vehicle_number')
-        logging.debug(f"Vehicle number entered: {vehicle_number}")
-        
-        # קריאה ל-API
+# פונקציה שמקבלת רשימת מספרי רכבים ומבצעת חיפוש לכל אחד
+def process_vehicle_numbers(vehicle_numbers):
+    results = []
+    for vehicle_number in vehicle_numbers:
         records = fetch_vehicle_data(vehicle_number)
-        
         if records:
             model = records[0].get('kinuy_mishari', '').strip()
             fuel_type = records[0].get('sug_delek_nm', '').strip()
-            
-            # חיפוש המודל ב-CSV לפי סוג דלק
-            db_record = search_vehicle_in_csv(model, fuel_type)
+            db_record = smart_search_vehicle_in_csv(model, fuel_type)
+            results.append({'vehicle_number': vehicle_number, 'records': records, 'db_record': db_record})
+        else:
+            results.append({'vehicle_number': vehicle_number, 'records': None, 'db_record': None})
+    return results
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    all_results = None
+    error_message = None
     
-    return render_template('index.html', records=records, db_record=db_record, error_message=error_message)
+    if request.method == 'POST':
+        vehicle_numbers_raw = request.form.get('vehicle_numbers')
+        logging.debug(f"Vehicle numbers entered: {vehicle_numbers_raw}")
+        
+        # פירוק הקלט למספרי רכבים בודדים על בסיס שורות ורווחים
+        vehicle_numbers = [num.strip() for num in vehicle_numbers_raw.splitlines() if num.strip()]
+        
+        if vehicle_numbers:
+            all_results = process_vehicle_numbers(vehicle_numbers)
+        else:
+            error_message = "לא הוזנו מספרי רכבים תקינים."
+
+    return render_template('index.html', all_results=all_results, error_message=error_message)
 
 if __name__ == '__main__':
     app.run(debug=True)
