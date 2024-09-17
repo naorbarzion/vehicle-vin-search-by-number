@@ -142,8 +142,9 @@
     </form>
 
     <!-- פרטי רכב מהמאגר הממשלתי (תוצאות API) -->
-    {% for index, records in enumerate(records_list) %}
-        <h2 style="text-align: center;">פרטי רכב {{ index + 1 }} מהמאגר הממשלתי:</h2>
+    {% set index = 1 %}
+    {% for records in records_list %}
+        <h2 style="text-align: center;">פרטי רכב {{ index }} מהמאגר הממשלתי:</h2>
         {% if records %}
         <table>
             <thead>
@@ -176,11 +177,13 @@
         {% else %}
         <p style="text-align: center;">לא נמצאו תוצאות במאגר הממשלתי עבור מספר רכב זה.</p>
         {% endif %}
+        {% set index = index + 1 %}
     {% endfor %}
 
     <!-- תמיכה במכשירי FMC (תוצאות מהמאגר המקומי) -->
-    {% for index, db_record in enumerate(db_records_list) %}
-        <h2 style="text-align: center;">תמיכה במכשירי FMC עבור רכב {{ index + 1 }}:</h2>
+    {% set index = 1 %}
+    {% for db_record in db_records_list %}
+        <h2 style="text-align: center;">תמיכה במכשירי FMC עבור רכב {{ index }}:</h2>
         {% if db_record is not none %}
         <table>
             <thead>
@@ -192,7 +195,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for index, row in db_record.iterrows() %}
+                {% for row in db_record.iterrows() %}
                 <tr>
                     <td>{{ row['Model'] }}</td>
                     <td>{{ row['Make'] }}</td>
@@ -219,6 +222,7 @@
         {% else %}
         <p style="text-align: center;">לא נמצאו תוצאות במאגר המקומי עבור רכב זה.</p>
         {% endif %}
+        {% set index = index + 1 %}
     {% endfor %}
 
 </body>
