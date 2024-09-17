@@ -152,7 +152,7 @@
         </thead>
         <tbody>
             {% for record in records %}
-            <tr class="{% if record in unsupported_vehicles %}unsupported{% endif %}">
+            <tr class="{% if record['mispar_rechev'] in unsupported_vehicles %}unsupported{% endif %}">
                 <td>{{ record['mispar_rechev'] }}</td>
                 <td>{{ record['kinuy_mishari'] }}</td>
                 <td>{{ record['tozeret_nm'] }}</td>
