@@ -5,27 +5,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>רשימת רכבים</title>
     <style>
-        /* שומר על אותו עיצוב */
-        body { font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 0; }
-        .header { background-color: #00a2ff; padding: 20px; text-align: center; }
-        .header img { max-height: 80px; }
-        h1 { color: #333; text-align: center; margin-top: 20px; }
-        form { text-align: center; margin-bottom: 20px; }
-        input[type="text"] { padding: 10px; font-size: 16px; width: 300px; }
-        button { padding: 10px 20px; background-color: #00a2ff; color: white; border: none; cursor: pointer; font-size: 16px; }
-        button:hover { background-color: #008fcc; }
-        table { width: 90%; margin: 0 auto; border-collapse: collapse; margin-bottom: 20px; }
-        table, th, td { border: 1px solid #ddd; }
-        th { background-color: #00a2ff; color: white; padding: 10px; text-align: center; }
-        td { background-color: #ffffff; padding: 10px; text-align: center; }
-        .action-button { background-color: #00a2ff; color: white; border: none; padding: 8px 16px; cursor: pointer; }
-        .action-button:hover { background-color: #008fcc; }
+        /* עיצוב כללי */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* עיצוב החלק העליון */
+        .header {
+            background-color: #00a2ff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header img {
+            max-height: 80px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* עיצוב טופס */
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #00a2ff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #008fcc;
+        }
+
+        /* עיצוב טבלה */
+        table {
+            width: 90%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #00a2ff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        td {
+            background-color: #ffffff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* כפתור בטבלה */
+        .action-button {
+            background-color: #00a2ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background-color: #008fcc;
+        }
+
+        /* התאמה למובייל - עיצוב טבלה אנכית */
         @media screen and (max-width: 768px) {
-            table, thead, tbody, th, td, tr { display: block; width: 100%; }
-            tr { margin-bottom: 10px; border-bottom: 2px solid #ddd; }
-            td, th { text-align: left; padding-left: 50%; position: relative; }
-            td:before, th:before { position: absolute; left: 10px; top: 10px; white-space: nowrap; }
-            td:before { content: attr(data-label); font-weight: bold; }
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+
+            tr {
+                margin-bottom: 10px;
+                border-bottom: 2px solid #ddd;
+            }
+
+            td, th {
+                text-align: left;
+                padding-left: 50%;
+                position: relative;
+            }
+
+            td:before, th:before {
+                position: absolute;
+                left: 10px;
+                top: 10px;
+                white-space: nowrap;
+            }
+
+            /* כותרות שדה עבור מובייל */
+            td:before {
+                content: attr(data-label);
+                font-weight: bold;
+            }
         }
     </style>
 </head>
@@ -109,4 +206,20 @@
                     <td>
                         {% if 'Battery Level' in row and row['Battery Level'] is not none %}
                             {{ row['Battery Level'] }}
-                        {% elif 'Fuel, l' in row and row['Fuel,
+                        {% elif 'Fuel, l' in row and row['Fuel, l'] is not none %}
+                            {{ row['Fuel, l'] }}
+                        {% else %}
+                            לא זמין
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="text-align: center;">לא נמצאו תוצאות במאגר המקומי עבור רכב זה.</p>
+        {% endif %}
+    {% endfor %}
+
+</body>
+</html>
