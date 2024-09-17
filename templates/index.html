@@ -1,79 +1,91 @@
-import os
-import pandas as pd
-from flask import Flask, request, render_template
-import requests
-import logging
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>רשימת רכבים</title>
+    <style>
+        /* עיצוב כללי וכו' (לא שונה) */
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://team.tracer.co.il/assets/logo.png" alt="Tracer Logo">
+    </div>
 
-app = Flask(__name__)
+    <h1>רשימת רכבים</h1>
 
-# הגדרת הלוגים
-logging.basicConfig(level=logging.INFO)
+    <!-- טופס החיפוש -->
+    <form method="POST">
+        <textarea id="vehicle_number" name="vehicle_number" placeholder="הכנס מספרי רכבים מופרדים בפסיקים..." required></textarea>
+        <button type="submit">חפש</button>
+    </form>
 
-# פונקציה לקריאת הנתונים מה-CSV ולניקוי הרווחים
-def read_vehicle_data_from_csv(csv_file_path):
-    try:
-        data = pd.read_csv(csv_file_path)
-        data['Model'] = data['Model'].str.strip()
-        data.columns = [col.replace('\r\n', ' ') for col in data.columns]
-        logging.info(f"Successfully read data from {csv_file_path}")
-        return data
-    except Exception as e:
-        logging.error(f"Error reading CSV file {csv_file_path}: {e}")
-        return None
+    <!-- פרטי רכב מהמאגר הממשלתי (תוצאות API) -->
+    <h2 style="text-align: center;">פרטי רכבים מהמאגר הממשלתי:</h2>
+    {% if records %}
+    <table>
+        <thead>
+            <tr>
+                <th>מספר רכב</th>
+                <th>מודל</th>
+                <th>יצרן</th>
+                <th>שנת ייצור</th>
+                <th>צבע</th>
+                <th>בעלות</th>
+                <th>תאריך בדיקה אחרונה</th>
+                <th>סוג דלק</th>
+                <th>מספר VIN</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record['mispar_rechev'] }}</td>
+                <td>{{ record['kinuy_mishari'] }}</td>
+                <td>{{ record['tozeret_nm'] }}</td>
+                <td>{{ record['shnat_yitzur'] }}</td>
+                <td>{{ record['tzeva_rechev'] }}</td>
+                <td>{{ record['baalut'] }}</td>
+                <td>{{ record['mivchan_acharon_dt'] }}</td>
+                <td>{{ record['sug_delek_nm'] }}</td>
+                <td>{{ record['misgeret'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center;">לא נמצאו תוצאות במאגר הממשלתי.</p>
+    {% endif %}
 
-# פונקציה לחיפוש המודל ב-CSV לפי סוג דלק
-def search_vehicle_in_csv(model, fuel_type):
-    csv_file_path = ''
-    if fuel_type == 'חשמל':
-        csv_file_path = 'database/fmc_vehicles_list_electric.csv'
-    else:
-        csv_file_path = 'database/fmc_vehicles_list.csv'
-    
-    vehicle_data = read_vehicle_data_from_csv(csv_file_path)
-    if vehicle_data is not None:
-        clean_model = model.strip()
-        result = vehicle_data[vehicle_data['Model'].str.contains(clean_model, case=False, na=False)]
-        return result if not result.empty else None
-    else:
-        return None
+    <!-- תמיכה במכשירי FMC (תוצאות מהמאגר המקומי) -->
+    <h2 style="text-align: center;">תמיכה במכשירי FMC:</h2>
+    {% if db_records %}
+    {% for db_record in db_records %}
+    <table>
+        <thead>
+            <tr>
+                <th>מודל</th>
+                <th>יצרן</th>
+                <th>קריאת קילומטראז'</th>
+                <th>קריאת דלק/סוללה</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for index, row in db_record.iterrows() %}
+            <tr>
+                <td>{{ row['Model'] }}</td>
+                <td>{{ row['Make'] }}</td>
+                <td>{{ row.get('Kilometer', 'לא זמין') }}</td>
+                <td>{{ row.get('Battery Level', row.get('Fuel, l', 'לא זמין')) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+    {% else %}
+    <p style="text-align: center;">לא נמצאו תוצאות במאגר המקומי.</p>
+    {% endif %}
 
-# פונקציה לחיפוש ב-API של CKAN
-def fetch_vehicle_data(vehicle_number):
-    url = "https://data.gov.il/api/3/action/datastore_search"
-    resource_id = "053cea08-09bc-40ec-8f7a-156f0677aff3"
-    params = {
-        "resource_id": resource_id,
-        "q": vehicle_number
-    }
-    try:
-        response = requests.get(url, params=params)
-        data = response.json()
-        return data['result']['records'] if data.get('success') else []
-    except Exception as e:
-        logging.error(f"Failed to retrieve data from CKAN API: {e}")
-        return []
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    all_records = []
-    all_db_records = []
-    error_message = None
-    
-    if request.method == 'POST':
-        vehicle_numbers = request.form.get('vehicle_number')
-        vehicle_numbers_list = [num.strip() for num in vehicle_numbers.split(',') if num.strip()]
-        
-        for vehicle_number in vehicle_numbers_list:
-            records = fetch_vehicle_data(vehicle_number)
-            if records:
-                model = records[0].get('kinuy_mishari', '').strip()
-                fuel_type = records[0].get('sug_delek_nm', '').strip()
-                db_record = search_vehicle_in_csv(model, fuel_type)
-                all_records.append(records[0])
-                if db_record is not None:
-                    all_db_records.append(db_record)
-    
-    return render_template('index.html', records=all_records, db_records=all_db_records, error_message=error_message)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+</body>
+</html>
