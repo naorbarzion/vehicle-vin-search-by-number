@@ -36,10 +36,11 @@
             margin-bottom: 20px;
         }
 
-        input[type="text"] {
+        textarea {
             padding: 10px;
             font-size: 16px;
             width: 300px;
+            height: 150px;
         }
 
         button {
@@ -137,84 +138,68 @@
 
     <!-- טופס החיפוש -->
     <form method="POST">
-        <input type="text" id="vehicle_number" name="vehicle_number" placeholder="הכנס מספר רכב..." required>
+        <textarea id="vehicle_numbers" name="vehicle_numbers" placeholder="הכנס מספרי רכבים (שורה חדשה לכל רכב)" required></textarea>
         <button type="submit">חפש</button>
     </form>
 
-    <!-- פרטי רכב מהמאגר הממשלתי (תוצאות API) -->
-    <h2 style="text-align: center;">פרטי רכב מהמאגר הממשלתי:</h2>
-    {% if records %}
-    <table>
-        <thead>
-            <tr>
-                <th>מספר רכב</th>
-                <th>מודל</th>
-                <th>יצרן</th>
-                <th>שנת ייצור</th>
-                <th>צבע</th>
-                <th>בעלות</th>
-                <th>תאריך בדיקה אחרונה</th>
-                <th>סוג דלק</th>
-                <th>מספר VIN</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ records[0]['mispar_rechev'] }}</td>
-                <td>{{ records[0]['kinuy_mishari'] }}</td>
-                <td>{{ records[0]['tozeret_nm'] }}</td>
-                <td>{{ records[0]['shnat_yitzur'] }}</td>
-                <td>{{ records[0]['tzeva_rechev'] }}</td>
-                <td>{{ records[0]['baalut'] }}</td>
-                <td>{{ records[0]['mivchan_acharon_dt'] }}</td>
-                <td>{{ records[0]['sug_delek_nm'] }}</td>
-                <td>{{ records[0]['misgeret'] }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <!-- הצגת תוצאות חיפוש -->
+    {% if all_results %}
+        <h2 style="text-align: center;">תוצאות חיפוש רכבים:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>מספר רכב</th>
+                    <th>מודל</th>
+                    <th>יצרן</th>
+                    <th>שנת ייצור</th>
+                    <th>צבע</th>
+                    <th>בעלות</th>
+                    <th>תאריך בדיקה אחרונה</th>
+                    <th>סוג דלק</th>
+                    <th>מספר VIN</th>
+                    <th>תמיכה במכשירי FMC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in all_results %}
+                    {% if result.records %}
+                        <tr>
+                            <td>{{ result.records[0]['mispar_rechev'] }}</td>
+                            <td>{{ result.records[0]['kinuy_mishari'] }}</td>
+                            <td>{{ result.records[0]['tozeret_nm'] }}</td>
+                            <td>{{ result.records[0]['shnat_yitzur'] }}</td>
+                            <td>{{ result.records[0]['tzeva_rechev'] }}</td>
+                            <td>{{ result.records[0]['baalut'] }}</td>
+                            <td>{{ result.records[0]['mivchan_acharon_dt'] }}</td>
+                            <td>{{ result.records[0]['sug_delek_nm'] }}</td>
+                            <td>{{ result.records[0]['misgeret'] }}</td>
+                            <td>
+                                {% if result.db_record %}
+                                    <ul>
+                                        {% for index, row in result.db_record.iterrows() %}
+                                            <li>{{ row['Model'] }} - {{ row['Make'] }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    לא נמצאו תוצאות במאגר FMC
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="10">לא נמצאו תוצאות עבור מספר רכב {{ result.vehicle_number }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
     {% else %}
-    <p style="text-align: center;">לא נמצאו תוצאות במאגר הממשלתי.</p>
+        <p style="text-align: center;">לא נמצאו תוצאות.</p>
     {% endif %}
 
-    <!-- תמיכה במכשירי FMC (תוצאות מהמאגר המקומי) -->
-    <h2 style="text-align: center;">תמיכה במכשירי FMC:</h2>
-    {% if db_record is not none %}
-    <table>
-        <thead>
-            <tr>
-                <th>מודל</th>
-                <th>יצרן</th>
-                <th>קריאת קילומטראז'</th>
-                <th>קריאת דלק/סוללה</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for index, row in db_record.iterrows() %}
-            <tr>
-                <td>{{ row['Model'] }}</td>
-                <td>{{ row['Make'] }}</td>
-                <td>
-                    {% if 'Kilometer' in row and row['Kilometer'] is not none %}
-                        {{ row['Kilometer'] }}
-                    {% else %}
-                        לא זמין
-                    {% endif %}
-                </td>
-                <td>
-                    {% if 'Battery Level' in row and row['Battery Level'] is not none %}
-                        {{ row['Battery Level'] }}
-                    {% elif 'Fuel, l' in row and row['Fuel, l'] is not none %}
-                        {{ row['Fuel, l'] }}
-                    {% else %}
-                        לא זמין
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p style="text-align: center;">לא נמצאו תוצאות במאגר המקומי.</p>
+    <!-- הודעת שגיאה במקרה הצורך -->
+    {% if error_message %}
+        <p style="text-align: center; color: red;">{{ error_message }}</p>
     {% endif %}
 
 </body>
