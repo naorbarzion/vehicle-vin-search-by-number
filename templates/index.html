@@ -5,91 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>רשימת רכבים</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
-
-        .header {
-            background-color: #00a2ff;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .header img {
-            max-height: 80px;
-        }
-
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        form {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        textarea {
-            padding: 10px;
-            font-size: 16px;
-            width: 300px;
-            height: 150px;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #00a2ff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background-color: #008fcc;
-        }
-
-        table {
-            width: 90%;
-            margin: 0 auto;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #00a2ff;
-            color: white;
-            padding: 10px;
-            text-align: center;
-        }
-
-        td {
-            background-color: #ffffff;
-            padding: 10px;
-            text-align: center;
-        }
-
-        #download {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            background-color: #00a2ff;
-            color: white;
-            text-align: center;
-            text-decoration: none;
+        /* שומר על אותו עיצוב */
+        body { font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 0; }
+        .header { background-color: #00a2ff; padding: 20px; text-align: center; }
+        .header img { max-height: 80px; }
+        h1 { color: #333; text-align: center; margin-top: 20px; }
+        form { text-align: center; margin-bottom: 20px; }
+        input[type="text"] { padding: 10px; font-size: 16px; width: 300px; }
+        button { padding: 10px 20px; background-color: #00a2ff; color: white; border: none; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #008fcc; }
+        table { width: 90%; margin: 0 auto; border-collapse: collapse; margin-bottom: 20px; }
+        table, th, td { border: 1px solid #ddd; }
+        th { background-color: #00a2ff; color: white; padding: 10px; text-align: center; }
+        td { background-color: #ffffff; padding: 10px; text-align: center; }
+        .action-button { background-color: #00a2ff; color: white; border: none; padding: 8px 16px; cursor: pointer; }
+        .action-button:hover { background-color: #008fcc; }
+        @media screen and (max-width: 768px) {
+            table, thead, tbody, th, td, tr { display: block; width: 100%; }
+            tr { margin-bottom: 10px; border-bottom: 2px solid #ddd; }
+            td, th { text-align: left; padding-left: 50%; position: relative; }
+            td:before, th:before { position: absolute; left: 10px; top: 10px; white-space: nowrap; }
+            td:before { content: attr(data-label); font-weight: bold; }
         }
     </style>
 </head>
 <body>
 
+    <!-- אזור הכותרת עם לוגו -->
     <div class="header">
         <img src="https://team.tracer.co.il/assets/logo.png" alt="Tracer Logo">
     </div>
@@ -98,51 +40,73 @@
 
     <!-- טופס החיפוש -->
     <form method="POST">
-        <textarea id="vehicle_numbers" name="vehicle_numbers" placeholder="הכנס מספרי רכבים (שורה חדשה לכל רכב)" required></textarea>
+        <input type="text" id="vehicle_number" name="vehicle_number" placeholder="הכנס מספרי רכב..." required>
         <button type="submit">חפש</button>
     </form>
 
-    {% if all_results %}
-        <h2 style="text-align: center;">תוצאות חיפוש רכבים:</h2>
+    <!-- פרטי רכב מהמאגר הממשלתי (תוצאות API) -->
+    {% for index, records in enumerate(records_list) %}
+        <h2 style="text-align: center;">פרטי רכב {{ index + 1 }} מהמאגר הממשלתי:</h2>
+        {% if records %}
         <table>
             <thead>
                 <tr>
                     <th>מספר רכב</th>
                     <th>מודל</th>
                     <th>יצרן</th>
-                    <th>קריאת קילומטראז'</th>
-                    <th>קריאת דלק/סוללה</th>
-                    <th>תמיכה במכשירי FMC</th>
+                    <th>שנת ייצור</th>
+                    <th>צבע</th>
+                    <th>בעלות</th>
+                    <th>תאריך בדיקה אחרונה</th>
+                    <th>סוג דלק</th>
+                    <th>מספר VIN</th>
                 </tr>
             </thead>
             <tbody>
-                {% for result in all_results %}
-                    <tr>
-                        <td>{{ result.vehicle_number }}</td>
-                        <td>{% if result.records %}{{ result.records[0]['kinuy_mishari'] }}{% else %}לא נמצאו תוצאות{% endif %}</td>
-                        <td>{% if result.records %}{{ result.records[0]['tozeret_nm'] }}{% else %}לא נמצאו תוצאות{% endif %}</td>
-                        <td>{% if result.records %}{{ result.records[0]['Kilometer'] | default('לא זמין') }}{% else %}לא זמין{% endif %}</td>
-                        <td>{% if result.records %}{{ result.records[0]['Fuel, l'] | default('לא זמין') }}{% else %}לא זמין{% endif %}</td>
-                        <td>
-                            {% if result.db_record %}
-                                נמצאה תמיכה במאגר FMC
-                            {% else %}
-                                לא נמצאה תמיכה במאגר FMC
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
+                <tr>
+                    <td>{{ records[0]['mispar_rechev'] }}</td>
+                    <td>{{ records[0]['kinuy_mishari'] }}</td>
+                    <td>{{ records[0]['tozeret_nm'] }}</td>
+                    <td>{{ records[0]['shnat_yitzur'] }}</td>
+                    <td>{{ records[0]['tzeva_rechev'] }}</td>
+                    <td>{{ records[0]['baalut'] }}</td>
+                    <td>{{ records[0]['mivchan_acharon_dt'] }}</td>
+                    <td>{{ records[0]['sug_delek_nm'] }}</td>
+                    <td>{{ records[0]['misgeret'] }}</td>
+                </tr>
             </tbody>
         </table>
-        <!-- כפתור להורדת התוצאות כ-CSV -->
-        <a id="download" href="/download_csv?vehicle_numbers={{ request.form['vehicle_numbers'] }}">הורד תוצאות כ-CSV</a>
-    {% else %}
-        <p style="text-align: center;">לא נמצאו תוצאות.</p>
-    {% endif %}
+        {% else %}
+        <p style="text-align: center;">לא נמצאו תוצאות במאגר הממשלתי עבור מספר רכב זה.</p>
+        {% endif %}
+    {% endfor %}
 
-    {% if error_message %}
-        <p style="text-align: center; color: red;">{{ error_message }}</p>
-    {% endif %}
-
-</body>
-</html>
+    <!-- תמיכה במכשירי FMC (תוצאות מהמאגר המקומי) -->
+    {% for index, db_record in enumerate(db_records_list) %}
+        <h2 style="text-align: center;">תמיכה במכשירי FMC עבור רכב {{ index + 1 }}:</h2>
+        {% if db_record is not none %}
+        <table>
+            <thead>
+                <tr>
+                    <th>מודל</th>
+                    <th>יצרן</th>
+                    <th>קריאת קילומטראז'</th>
+                    <th>קריאת דלק/סוללה</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, row in db_record.iterrows() %}
+                <tr>
+                    <td>{{ row['Model'] }}</td>
+                    <td>{{ row['Make'] }}</td>
+                    <td>
+                        {% if 'Kilometer' in row and row['Kilometer'] is not none %}
+                            {{ row['Kilometer'] }}
+                        {% else %}
+                            לא זמין
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if 'Battery Level' in row and row['Battery Level'] is not none %}
+                            {{ row['Battery Level'] }}
+                        {% elif 'Fuel, l' in row and row['Fuel,
