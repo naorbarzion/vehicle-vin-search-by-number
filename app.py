@@ -56,7 +56,7 @@ def fetch_vehicle_data(vehicle_number):
 def index():
     all_records = []
     all_db_records = []
-    unsupported_vehicles = []  # נוודא שרק מספרי רכב נכנסים כאן
+    unsupported_records = []  # נשמור כאן את הרכבים שלא נתמכים
     supported_count = 0
     unsupported_count = 0
     
@@ -75,14 +75,14 @@ def index():
                     all_db_records.append(db_record)
                     supported_count += 1
                 else:
-                    unsupported_vehicles.append(records[0]['mispar_rechev'])  # רק מספרי הרכב
+                    unsupported_records.append(records[0])  # הוספת הרכב לרשימה של הלא נתמכים
                     unsupported_count += 1
 
     return render_template(
         'index.html', 
         records=all_records, 
         db_records=all_db_records, 
-        unsupported_vehicles=unsupported_vehicles,  # כאן רק מספרי רכב
+        unsupported_records=unsupported_records,  # טבלה של הרכבים הלא נתמכים
         supported_count=supported_count, 
         unsupported_count=unsupported_count
     )
