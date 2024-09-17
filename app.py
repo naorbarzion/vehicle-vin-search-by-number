@@ -23,7 +23,6 @@ def read_vehicle_data_from_csv(csv_file_path):
 
 # פונקציה לחיפוש המודל ב-CSV לפי סוג דלק
 def search_vehicle_in_csv(model, fuel_type):
-    csv_file_path = ''
     if fuel_type == 'חשמל':
         csv_file_path = 'database/fmc_vehicles_list_electric.csv'
     else:
@@ -57,7 +56,9 @@ def fetch_vehicle_data(vehicle_number):
 def index():
     all_records = []
     all_db_records = []
-    error_message = None
+    unsupported_vehicles = []
+    supported_count = 0
+    unsupported_count = 0
     
     if request.method == 'POST':
         vehicle_numbers = request.form.get('vehicle_number')
@@ -72,8 +73,19 @@ def index():
                 all_records.append(records[0])
                 if db_record is not None:
                     all_db_records.append(db_record)
-    
-    return render_template('index.html', records=all_records, db_records=all_db_records, error_message=error_message)
+                    supported_count += 1
+                else:
+                    unsupported_vehicles.append(records[0])
+                    unsupported_count += 1
+
+    return render_template(
+        'index.html', 
+        records=all_records, 
+        db_records=all_db_records, 
+        unsupported_vehicles=unsupported_vehicles, 
+        supported_count=supported_count, 
+        unsupported_count=unsupported_count
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
