@@ -178,30 +178,4 @@
     <h2 style="text-align: center;">תמיכה במכשירי FMC:</h2>
     {% if db_records %}
     <table>
-        <thead>
-            <tr>
-                <th>מודל</th>
-                <th>יצרן</th>
-                <th>קריאת קילומטראז'</th>
-                <th>קריאת דלק/סוללה</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for db_record in db_records %}
-            {% for index, row in db_record.iterrows() %}
-            <tr>
-                <td>{{ row['Model'] }}</td>
-                <td>{{ row['Make'] }}</td>
-                <td>{{ row.get('Kilometer', 'לא זמין') }}</td>
-                <td>{{ row.get('Battery Level', row.get('Fuel, l', 'לא זמין')) }}</td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p style="text-align: center;">לא נמצאו תוצאות במאגר המקומי.</p>
-    {% endif %}
-
-</body>
-</html>
+        <
