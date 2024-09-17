@@ -76,6 +76,16 @@
             padding: 10px;
             text-align: center;
         }
+
+        #download {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #00a2ff;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -92,7 +102,6 @@
         <button type="submit">חפש</button>
     </form>
 
-    <!-- הצגת תוצאות חיפוש -->
     {% if all_results %}
         <h2 style="text-align: center;">תוצאות חיפוש רכבים:</h2>
         <table>
@@ -101,8 +110,9 @@
                     <th>מספר רכב</th>
                     <th>מודל</th>
                     <th>יצרן</th>
-                    <th>סוג דלק</th>
-                    <th>מצב חיפוש</th>
+                    <th>קריאת קילומטראז'</th>
+                    <th>קריאת דלק/סוללה</th>
+                    <th>תמיכה במכשירי FMC</th>
                 </tr>
             </thead>
             <tbody>
@@ -111,7 +121,8 @@
                         <td>{{ result.vehicle_number }}</td>
                         <td>{% if result.records %}{{ result.records[0]['kinuy_mishari'] }}{% else %}לא נמצאו תוצאות{% endif %}</td>
                         <td>{% if result.records %}{{ result.records[0]['tozeret_nm'] }}{% else %}לא נמצאו תוצאות{% endif %}</td>
-                        <td>{% if result.records %}{{ result.records[0]['sug_delek_nm'] }}{% else %}לא נמצאו תוצאות{% endif %}</td>
+                        <td>{% if result.records %}{{ result.records[0]['Kilometer'] | default('לא זמין') }}{% else %}לא זמין{% endif %}</td>
+                        <td>{% if result.records %}{{ result.records[0]['Fuel, l'] | default('לא זמין') }}{% else %}לא זמין{% endif %}</td>
                         <td>
                             {% if result.db_record %}
                                 נמצאה תמיכה במאגר FMC
@@ -123,6 +134,8 @@
                 {% endfor %}
             </tbody>
         </table>
+        <!-- כפתור להורדת התוצאות כ-CSV -->
+        <a id="download" href="/download_csv?vehicle_numbers={{ request.form['vehicle_numbers'] }}">הורד תוצאות כ-CSV</a>
     {% else %}
         <p style="text-align: center;">לא נמצאו תוצאות.</p>
     {% endif %}
