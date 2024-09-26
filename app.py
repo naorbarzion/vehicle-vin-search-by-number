@@ -11,6 +11,11 @@ app = Flask(__name__)
 # הגדרת הלוגים
 logging.basicConfig(level=logging.INFO)
 
+# פונקציה לניקוי רווחים וסימנים מיוחדים ולנרמול המחרוזת
+def normalize_model_name(name):
+    name = name.replace("-", " ").replace("HYBRID", "").replace("  ", " ")  # הסרת מקפים ו-HYBRID
+    return "".join(name.split()).lower()  # הסרת כל הרווחים וקטנים את הכל
+
 # פונקציה לקריאת הנתונים מה-CSV ולניקוי הרווחים
 def read_vehicle_data_from_csv(csv_file_path):
     try:
@@ -23,11 +28,7 @@ def read_vehicle_data_from_csv(csv_file_path):
         logging.error(f"Error reading CSV file {csv_file_path}: {e}")
         return None
 
-# פונקציה לניקוי רווחים וסידור מילים
-def normalize_model_name(name):
-    return " ".join(name.split()).replace("-", " ").lower()
-
-# פונקציה לחיפוש המודל ב-CSV לפי סוג דלק עם Fuzzy Matching
+# פונקציה לחיפוש המודל ב-CSV לפי סוג דלק עם Fuzzy Matching חכם
 def search_vehicle_in_csv(model, fuel_type):
     if fuel_type == 'חשמל':
         csv_file_path = 'database/fmc_vehicles_list_electric.csv'
@@ -36,17 +37,18 @@ def search_vehicle_in_csv(model, fuel_type):
     
     vehicle_data = read_vehicle_data_from_csv(csv_file_path)
     if vehicle_data is not None:
-        clean_model = normalize_model_name(model.strip())  # ניקוי רווחים מיותרים וסידור המודל
+        clean_model = normalize_model_name(model.strip())  # ניקוי המודל
         
         # שימוש ב-Fuzzy Matching כדי למצוא את המודל הקרוב ביותר
         vehicle_models = vehicle_data['Model'].apply(normalize_model_name).tolist()
         closest_match, score = process.extractOne(clean_model, vehicle_models, scorer=fuzz.token_sort_ratio)
         
         # נבדוק אם הציון של ההתאמה מספיק גבוה כדי להיחשב כהתאמה
-        if score > 70:  # ניתן לכוון את הסף של הדמיון
+        if score > 65:  # הורדת הסף מעט כדי לאפשר גמישות
             result = vehicle_data[vehicle_data['Model'].apply(normalize_model_name) == closest_match]
             return result if not result.empty else None
         else:
+            logging.info(f"No close match found for {model} in the database.")
             return None
     else:
         return None
