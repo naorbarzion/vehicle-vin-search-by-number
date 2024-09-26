@@ -3,6 +3,8 @@ import pandas as pd
 from flask import Flask, request, render_template
 import requests
 import logging
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 
 app = Flask(__name__)
 
@@ -21,7 +23,7 @@ def read_vehicle_data_from_csv(csv_file_path):
         logging.error(f"Error reading CSV file {csv_file_path}: {e}")
         return None
 
-# פונקציה לחיפוש המודל ב-CSV לפי סוג דלק
+# פונקציה לחיפוש המודל ב-CSV לפי סוג דלק עם Fuzzy Matching
 def search_vehicle_in_csv(model, fuel_type):
     if fuel_type == 'חשמל':
         csv_file_path = 'database/fmc_vehicles_list_electric.csv'
@@ -31,8 +33,17 @@ def search_vehicle_in_csv(model, fuel_type):
     vehicle_data = read_vehicle_data_from_csv(csv_file_path)
     if vehicle_data is not None:
         clean_model = model.strip()
-        result = vehicle_data[vehicle_data['Model'].str.contains(clean_model, case=False, na=False)]
-        return result if not result.empty else None
+        
+        # שימוש ב-Fuzzy Matching כדי למצוא את המודל הקרוב ביותר
+        vehicle_models = vehicle_data['Model'].tolist()
+        closest_match, score = process.extractOne(clean_model, vehicle_models, scorer=fuzz.token_sort_ratio)
+        
+        # נבדוק אם הציון של ההתאמה מספיק גבוה כדי להיחשב כהתאמה
+        if score > 70:  # ניתן לכוון את הסף של הדמיון
+            result = vehicle_data[vehicle_data['Model'] == closest_match]
+            return result if not result.empty else None
+        else:
+            return None
     else:
         return None
 
