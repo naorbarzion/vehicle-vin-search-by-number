@@ -23,6 +23,10 @@ def read_vehicle_data_from_csv(csv_file_path):
         logging.error(f"Error reading CSV file {csv_file_path}: {e}")
         return None
 
+# פונקציה לניקוי רווחים וסידור מילים
+def normalize_model_name(name):
+    return " ".join(name.split()).replace("-", " ").lower()
+
 # פונקציה לחיפוש המודל ב-CSV לפי סוג דלק עם Fuzzy Matching
 def search_vehicle_in_csv(model, fuel_type):
     if fuel_type == 'חשמל':
@@ -32,15 +36,15 @@ def search_vehicle_in_csv(model, fuel_type):
     
     vehicle_data = read_vehicle_data_from_csv(csv_file_path)
     if vehicle_data is not None:
-        clean_model = model.strip()
+        clean_model = normalize_model_name(model.strip())  # ניקוי רווחים מיותרים וסידור המודל
         
         # שימוש ב-Fuzzy Matching כדי למצוא את המודל הקרוב ביותר
-        vehicle_models = vehicle_data['Model'].tolist()
+        vehicle_models = vehicle_data['Model'].apply(normalize_model_name).tolist()
         closest_match, score = process.extractOne(clean_model, vehicle_models, scorer=fuzz.token_sort_ratio)
         
         # נבדוק אם הציון של ההתאמה מספיק גבוה כדי להיחשב כהתאמה
         if score > 70:  # ניתן לכוון את הסף של הדמיון
-            result = vehicle_data[vehicle_data['Model'] == closest_match]
+            result = vehicle_data[vehicle_data['Model'].apply(normalize_model_name) == closest_match]
             return result if not result.empty else None
         else:
             return None
