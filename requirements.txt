@@ -9,3 +9,5 @@ pandas==1.5.3
 numpy==1.23.5  # גרסה תואמת ל-Python 3.11
 python-dateutil>=2.8.1
 pytz>=2020.1
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.12.2
