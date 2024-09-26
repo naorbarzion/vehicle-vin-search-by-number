@@ -13,8 +13,10 @@ logging.basicConfig(level=logging.INFO)
 
 # פונקציה לניקוי רווחים וסימנים מיוחדים ולנרמול המחרוזת
 def normalize_model_name(name):
-    name = name.replace("-", " ").replace("HYBRID", "").replace("  ", " ")  # הסרת מקפים ו-HYBRID
-    return "".join(name.split()).lower()  # הסרת כל הרווחים וקטנים את הכל
+    if isinstance(name, str):
+        name = name.replace("-", " ").replace("HYBRID", "").replace("  ", " ")  # הסרת מקפים ו-HYBRID
+        return "".join(name.split()).lower()  # הסרת כל הרווחים וקטנים את הכל
+    return ""
 
 # פונקציה לקריאת הנתונים מה-CSV ולניקוי הרווחים
 def read_vehicle_data_from_csv(csv_file_path):
