@@ -69,17 +69,6 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        .loading-overlay.active {
-            opacity: 1;
-            display: flex;
-        }
-
-        .loading-content {
-            text-align: center;
         }
     </style>
 </head>
@@ -111,7 +100,7 @@
     <main class="container mx-auto px-4 py-8">
         <!-- Search Form -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8 fade-in">
-            <form method="POST" class="space-y-6" id="searchForm" onsubmit="showLoading()">
+            <form method="POST" class="space-y-6" id="searchForm">
                 <div class="relative">
                     <textarea 
                         id="vehicle_number" 
@@ -240,7 +229,7 @@
             </div>
             {% endif %}
 
-<!-- Statistics Summary -->
+            <!-- Statistics Summary -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="text-center p-4 bg-blue-50 rounded-lg hover-scale">
@@ -263,18 +252,12 @@
     </main>
 
     <script>
-        // Function to show loading overlay
-        function showLoading() {
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            loadingOverlay.classList.add('active');
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             const searchForm = document.getElementById('searchForm');
-            
-            // Add form submit handler
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
             searchForm.addEventListener('submit', (e) => {
-                showLoading();
+                loadingOverlay.style.display = 'flex';
             });
         });
     </script>
