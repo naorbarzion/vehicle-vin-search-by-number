@@ -155,6 +155,43 @@
             </div>
             {% endif %}
 
+            <!-- Unsupported Vehicles Table -->
+            {% if unsupported_records %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-4 border-b border-gray-200 bg-red-50">
+                    <h2 class="text-lg font-semibold text-red-800">רכבים לא נתמכים</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">מספר רכב</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">מודל</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">יצרן</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">שנת ייצור</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">צבע</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">סוג דלק</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">מספר VIN</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for record in unsupported_records %}
+                            <tr class="table-row-fade table-hover">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ record['mispar_rechev'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ record['kinuy_mishari'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record['tozeret_nm'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record['shnat_yitzur'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record['tzeva_rechev'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record['sug_delek_nm'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">{{ record['misgeret'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Statistics Summary -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="grid grid-cols-2 gap-4">
@@ -162,9 +199,9 @@
                         <p class="text-sm text-gray-500">רכבים נתמכים</p>
                         <p class="text-2xl font-bold text-blue-600">{{ supported_count }}</p>
                     </div>
-                    <div class="text-center p-4 bg-gray-50 rounded-lg hover-scale">
+                    <div class="text-center p-4 bg-red-50 rounded-lg hover-scale">
                         <p class="text-sm text-gray-500">רכבים לא נתמכים</p>
-                        <p class="text-2xl font-bold text-gray-600">{{ unsupported_count }}</p>
+                        <p class="text-2xl font-bold text-red-600">{{ unsupported_count }}</p>
                     </div>
                 </div>
             </div>
