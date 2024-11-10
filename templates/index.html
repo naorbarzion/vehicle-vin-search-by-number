@@ -41,9 +41,50 @@
         .table-hover:hover {
             background-color: rgba(243, 244, 246, 0.8);
         }
+
+        /* Loading Animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner mb-4"></div>
+            <div class="text-lg font-medium text-gray-600">מחפש נתונים...</div>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="bg-white shadow-sm">
         <div class="container mx-auto px-4 py-4">
@@ -63,7 +104,7 @@
     <main class="container mx-auto px-4 py-8">
         <!-- Search Form -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8 fade-in">
-            <form method="POST" class="space-y-6">
+            <form method="POST" class="space-y-6" id="searchForm">
                 <div class="relative">
                     <textarea 
                         id="vehicle_number" 
@@ -213,5 +254,16 @@
         </div>
         {% endif %}
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchForm = document.getElementById('searchForm');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
+            searchForm.addEventListener('submit', (e) => {
+                // Show loading overlay when form is submitted
+                loadingOverlay.style.display = 'flex';
+            });
+    </script>
 </body>
 </html>
