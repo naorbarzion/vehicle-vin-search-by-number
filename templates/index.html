@@ -1,239 +1,180 @@
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>רשימת רכבים</title>
+    <title>Vehicle Search - Tracer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* עיצוב כללי */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
+            font-family: 'Rubik', sans-serif;
         }
 
-        /* עיצוב החלק העליון */
-        .header {
-            background-color: #00a2ff;
-            padding: 20px;
-            text-align: center;
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
         }
 
-        .header img {
-            max-height: 80px;
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
 
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-top: 20px;
+        .hover-scale {
+            transition: transform 0.2s;
         }
 
-        /* עיצוב טופס */
-        form {
-            text-align: center;
-            margin-bottom: 20px;
+        .hover-scale:hover {
+            transform: scale(1.02);
         }
 
-        textarea {
-            padding: 10px;
-            font-size: 16px;
-            width: 300px;
-            height: 100px;
+        .table-row-fade {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
         }
 
-        button {
-            padding: 10px 20px;
-            background-color: #00a2ff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
+        .table-hover {
+            transition: background-color 0.2s;
         }
 
-        button:hover {
-            background-color: #008fcc;
-        }
-
-        /* עיצוב טבלאות */
-        table {
-            width: 90%;
-            margin: 0 auto;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #00a2ff;
-            color: white;
-            padding: 10px;
-            text-align: center;
-        }
-
-        td {
-            background-color: #ffffff;
-            padding: 10px;
-            text-align: center;
-        }
-
-        /* התאמה למובייל */
-        @media screen and (max-width: 768px) {
-            table, thead, tbody, th, td, tr {
-                display: block;
-                width: 100%;
-            }
-
-            tr {
-                margin-bottom: 10px;
-                border-bottom: 2px solid #ddd;
-            }
-
-            td, th {
-                text-align: left;
-                padding-left: 50%;
-                position: relative;
-            }
-
-            td:before, th:before {
-                position: absolute;
-                left: 10px;
-                top: 10px;
-                white-space: nowrap;
-            }
-
-            td:before {
-                content: attr(data-label);
-                font-weight: bold;
-            }
+        .table-hover:hover {
+            background-color: rgba(243, 244, 246, 0.8);
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <img src="https://tracer.co.il/wp-content/uploads/elementor/thumbs/Logo-H-p8d906f0bmrgobnn9uwquzibery89mtbvr1plpc910.png" 
+                     alt="Tracer Logo" 
+                     class="h-12 hover-scale">
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <i class="fas fa-car text-blue-600 text-xl"></i>
+                    <h1 class="text-xl font-bold text-gray-800">חיפוש רכבים</h1>
+                </div>
+            </div>
+        </div>
+    </header>
 
-    <!-- אזור הכותרת עם לוגו -->
-    <div class="header">
-        <img src="https://team.tracer.co.il/assets/logo.png" alt="Tracer Logo">
-    </div>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Search Form -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8 fade-in">
+            <form method="POST" class="space-y-6">
+                <div class="relative">
+                    <textarea 
+                        id="vehicle_number" 
+                        name="vehicle_number" 
+                        class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        rows="4"
+                        placeholder="הכנס מספרי רכבים מופרדים בפסיקים..."
+                        required
+                    ></textarea>
+                </div>
+                <div class="flex justify-center">
+                    <button type="submit" 
+                            class="hover-scale bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg flex items-center space-x-2 space-x-reverse transition duration-200">
+                        <i class="fas fa-search"></i>
+                        <span>חפש רכבים</span>
+                    </button>
+                </div>
+            </form>
+        </div>
 
-    <h1>רשימת רכבים</h1>
+        <!-- Results Section -->
+        {% if records %}
+        <div class="space-y-8 fade-in">
+            <!-- Government Database Results -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-800">פרטי רכבים מהמאגר הממשלתי</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">מספר רכב</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">מודל</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">יצרן</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">שנת ייצור</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">צבע</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">סוג דלק</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">מספר VIN</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for record in records %}
+                            <tr class="table-row-fade table-hover">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ record['mispar_rechev'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ record['kinuy_mishari'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record['tozeret_nm'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record['shnat_yitzur'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record['tzeva_rechev'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record['sug_delek_nm'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">{{ record['misgeret'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-    <!-- טופס החיפוש -->
-    <form method="POST">
-        <textarea id="vehicle_number" name="vehicle_number" placeholder="הכנס מספרי רכבים מופרדים בפסיקים..." required></textarea>
-        <button type="submit">חפש</button>
-    </form>
+            <!-- FMC Database Results -->
+            {% if db_records %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-800">תמיכה במכשירי FMC</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">מודל</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">יצרן</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">קריאת קילומטראז'</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">קריאת דלק/סוללה</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for db_record in db_records %}
+                            {% for index, row in db_record.iterrows() %}
+                            <tr class="table-row-fade table-hover">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row['Model'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ row['Make'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ row.get('Kilometer', 'לא זמין') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ row.get('Battery Level', row.get('Fuel, l', 'לא זמין')) }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
 
-    <!-- תוצאות API -->
-    <h2 style="text-align: center;">פרטי רכבים מהמאגר הממשלתי:</h2>
-    {% if records %}
-    <table>
-        <thead>
-            <tr>
-                <th>מספר רכב</th>
-                <th>מודל</th>
-                <th>יצרן</th>
-                <th>שנת ייצור</th>
-                <th>צבע</th>
-                <th>בעלות</th>
-                <th>תאריך בדיקה אחרונה</th>
-                <th>סוג דלק</th>
-                <th>מספר VIN</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in records %}
-            <tr>
-                <td>{{ record['mispar_rechev'] }}</td>
-                <td>{{ record['kinuy_mishari'] }}</td>
-                <td>{{ record['tozeret_nm'] }}</td>
-                <td>{{ record['shnat_yitzur'] }}</td>
-                <td>{{ record['tzeva_rechev'] }}</td>
-                <td>{{ record['baalut'] }}</td>
-                <td>{{ record['mivchan_acharon_dt'] }}</td>
-                <td>{{ record['sug_delek_nm'] }}</td>
-                <td>{{ record['misgeret'] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <p style="text-align: center;">
-        רכבים נתמכים: {{ supported_count }}<br>
-        רכבים לא נתמכים: {{ unsupported_count }}
-    </p>
-    {% else %}
-    <p style="text-align: center;">לא נמצאו תוצאות במאגר הממשלתי.</p>
-    {% endif %}
-
-    <!-- תמיכה במכשירי FMC (תוצאות מהמאגר המקומי) -->
-    <h2 style="text-align: center;">תמיכה במכשירי FMC:</h2>
-    {% if db_records %}
-    <table>
-        <thead>
-            <tr>
-                <th>מודל</th>
-                <th>יצרן</th>
-                <th>קריאת קילומטראז'</th>
-                <th>קריאת דלק/סוללה</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for db_record in db_records %}
-            {% for index, row in db_record.iterrows() %}
-            <tr>
-                <td>{{ row['Model'] }}</td>
-                <td>{{ row['Make'] }}</td>
-                <td>{{ row.get('Kilometer', 'לא זמין') }}</td>
-                <td>{{ row.get('Battery Level', row.get('Fuel, l', 'לא זמין')) }}</td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p style="text-align: center;">לא נמצאו תוצאות במאגר המקומי.</p>
-    {% endif %}
-
-    <!-- טבלה של רכבים לא נתמכים -->
-    <h2 style="text-align: center;">רכבים לא נתמכים:</h2>
-    {% if unsupported_records %}
-    <table>
-        <thead>
-            <tr>
-                <th>מספר רכב</th>
-                <th>מודל</th>
-                <th>יצרן</th>
-                <th>שנת ייצור</th>
-                <th>צבע</th>
-                <th>בעלות</th>
-                <th>תאריך בדיקה אחרונה</th>
-                <th>סוג דלק</th>
-                <th>מספר VIN</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in unsupported_records %}
-            <tr>
-                <td>{{ record['mispar_rechev'] }}</td>
-                <td>{{ record['kinuy_mishari'] }}</td>
-                <td>{{ record['tozeret_nm'] }}</td>
-                <td>{{ record['shnat_yitzur'] }}</td>
-                <td>{{ record['tzeva_rechev'] }}</td>
-                <td>{{ record['baalut'] }}</td>
-                <td>{{ record['mivchan_acharon_dt'] }}</td>
-                <td>{{ record['sug_delek_nm'] }}</td>
-                <td>{{ record['misgeret'] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p style="text-align: center;">לא נמצאו רכבים לא נתמכים.</p>
-    {% endif %}
-
+            <!-- Statistics Summary -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center p-4 bg-blue-50 rounded-lg hover-scale">
+                        <p class="text-sm text-gray-500">רכבים נתמכים</p>
+                        <p class="text-2xl font-bold text-blue-600">{{ supported_count }}</p>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded-lg hover-scale">
+                        <p class="text-sm text-gray-500">רכבים לא נתמכים</p>
+                        <p class="text-2xl font-bold text-gray-600">{{ unsupported_count }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center text-gray-500 my-12">
+            <i class="fas fa-car text-4xl mb-4"></i>
+            <p>לא נמצאו תוצאות במאגר</p>
+        </div>
+        {% endif %}
+    </main>
 </body>
 </html>
